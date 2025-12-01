@@ -17,5 +17,19 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dawsonfbroadbent/FALL_INTEX.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dawsonfbroadbent/FALL_INTEX/issues"
+  },
+  "homepage": "https://github.com/dawsonfbroadbent/FALL_INTEX#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.11"
   }
 }
