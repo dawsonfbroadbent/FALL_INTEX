@@ -172,6 +172,11 @@ app.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/"));
 });
 
+// Redirect to Givebutter donation page
+app.get("/donate", (req, res) => {
+  res.redirect(302, "https://givebutter.com/EllaRises");
+});
+
 // ---- Public Donations Page (accessible to ANY visitor) ----
 app.get("/donations", async (req, res) => {
   // Public-facing donation page.

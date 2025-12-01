@@ -5,7 +5,7 @@
     </a>
     <nav>
       <a href="/">Home</a>
-      <a href="/contact">Contact Us</a>
+      <a href="/contact">Contact</a>
       <% if (session && session.isLoggedIn) { %>
         <a href="/participants">Participants</a>
         <a href="/events">Events</a>
@@ -19,7 +19,7 @@
       <% } else { %>
         <a href="/login">Login</a>
       <% } %>
-      <a href="/donations" class="btn btn-primary">Donate</a>
+      <a href="/donate" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Donate</a>
     </nav>
   </div>
 </header>

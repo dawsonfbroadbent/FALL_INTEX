@@ -92,7 +92,7 @@ nav a:hover {
 }
 
 .hero {
-  background: linear-gradient(rgba(11, 11, 11, 0.7), rgba(11, 11, 11, 0.7)), url('https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1600') center/cover;
+  background: linear-gradient(rgba(11, 11, 11, 0.4), rgba(11, 11, 11, 0.6)), url('../images/activities/classroom.avif') center/cover;
   color: #fff;
   padding: 120px 0;
   text-align: center;
@@ -128,10 +128,16 @@ section h2 {
   color: #111;
 }
 
-.programs-grid {
+.programs-grid{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, minmax(300px, 1fr));
   gap: 30px;
+}
+
+@media (max-width: 650px){
+  .programs-grid{
+    grid-template-columns: 1fr;
+  }
 }
 
 .program-card {
@@ -148,7 +154,7 @@ section h2 {
 
 .program-card img {
   width: 100%;
-  height: 200px;
+  height: 300px;
   object-fit: cover;
 }
 
@@ -167,7 +173,7 @@ section h2 {
 }
 
 .about-section {
-  background: #f8f8f8;
+  background: #F3F4F6;
 }
 
 .about-content {
@@ -221,10 +227,11 @@ footer {
 }
 
 .page-header {
-  background: #F2C6C6;
+  background: #FDF1F1; /* ultra-light blush */
   color: #111;
   padding: 60px 0;
   text-align: center;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.08);
 }
 
 .page-header h1 {
@@ -457,4 +464,147 @@ tr:hover {
   .donation-amounts {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* THANK YOU / SPONSORS */
+.thankyou-section {
+  background: #FFF;
+}
+
+.thankyou-title {
+  text-align: center;
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+}
+
+.thankyou-text,
+.thankyou-subtext {
+  text-align: center;
+  max-width: 820px;
+  margin: 0 auto;
+  color: #333;
+}
+
+.thankyou-text {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.thankyou-subtext {
+  font-size: 16px;
+  opacity: 0.9;
+  font-weight: 700;      /* bold */
+  margin-bottom: 40px;
+}
+
+.sponsors-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 on one row */
+  gap: 18px;
+  align-items: stretch;   /* equal heights */
+}
+
+.sponsor-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;          /* slightly smaller */
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 120px;          /* all cards same size */
+}
+
+.sponsor-card img {
+  max-width: 140px;       /* narrower logo area */
+  width: 100%;
+  height: 70px;           /* consistent logo box */
+  object-fit: contain;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .sponsors-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 650px) {
+  .sponsors-grid { grid-template-columns: 1fr; }
+}
+
+/* DONATE (match THANK YOU styling) */
+.donate-section {
+  background: #FFF;
+}
+
+.donate-title {
+  text-align: center;
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+}
+
+.donate-text {
+  text-align: center;
+  max-width: 820px;
+  margin: 0 auto;
+  color: #333;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.donate-subtext {
+  text-align: center;
+  max-width: 820px;
+  margin: 0 auto;
+  color: #333;
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 10px;
+}
+
+.donate-final {
+  text-align: center;
+  max-width: 820px;
+  margin: 0 auto;
+  color: #333;
+  font-size: 16px;
+  opacity: 0.9;
+  font-weight: 700; /* bold like thankyou-subtext */
+  margin-bottom: 26px;
+}
+
+/* Donate button row */
+.donate-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+/* Optional: make email link match your site */
+.donate-section a {
+  color: #111;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Keep donate paragraph links styled, but NOT the button */
+.donate-section a.btn {
+  color: #fff;            /* matches .btn-primary */
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.donate-section a:hover {
+  text-decoration: underline;
+}
+
+/* PARTICIPANT BANNER */
+.banner-section {
+  padding: 0;           /* overrides your default section padding */
+}
+
+.banner-image {
+  width: 100%;
+  height: 500px;        /* adjust taller/shorter */
+  background: url("/images/activities/participant_banner.avif") center/cover no-repeat;
 }
