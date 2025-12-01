@@ -196,6 +196,11 @@ app.get("/donations", async (req, res) => {
   }
 });
 
+//Get contact route
+app.get("/contact", (req, res) => {
+  res.render("contact", { error_message: "" })
+});
+
 // Public donation submit (for donors/supporters). Adjust fields to match your DB columns.
 app.post("/donations/public", async (req, res) => {
   // Example expected body fields (rename to match your table):
