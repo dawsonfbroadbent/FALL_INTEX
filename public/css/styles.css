@@ -18,7 +18,7 @@ body {
 }
 
 header {
-  background: #0B0B0B;
+  background: #F2C6C6;
   padding: 15px 0;
   position: sticky;
   top: 0;
@@ -42,14 +42,14 @@ nav {
 }
 
 nav a {
-  color: #fff;
+  color: #111;
   text-decoration: none;
   font-size: 14px;
   transition: color 0.3s;
 }
 
 nav a:hover {
-  color: #F2C6C6;
+  color: #333;
 }
 
 .btn {
@@ -65,21 +65,21 @@ nav a:hover {
 }
 
 .btn-primary {
-  background: #F2C6C6;
-  color: #111;
+  background: #111;
+  color: #fff;
 }
 
 .btn-primary:hover {
-  background: #F1A6A0;
+  background: #333;
 }
 
 .btn-secondary {
-  background: #F1A6A0;
-  color: #111;
+  background: #333;
+  color: #fff;
 }
 
 .btn-secondary:hover {
-  background: #F2C6C6;
+  background: #111;
 }
 
 .btn-dark {
@@ -183,8 +183,8 @@ section h2 {
 }
 
 footer {
-  background: #0B0B0B;
-  color: #fff;
+  background: #F2C6C6;
+  color: #111;
   padding: 50px 0 20px;
 }
 
@@ -196,33 +196,33 @@ footer {
 }
 
 .footer-section h4 {
-  color: #F2C6C6;
+  color: #111;
   margin-bottom: 20px;
   font-size: 16px;
 }
 
 .footer-section a {
   display: block;
-  color: #aaa;
+  color: #333;
   text-decoration: none;
   margin-bottom: 10px;
   transition: color 0.3s;
 }
 
 .footer-section a:hover {
-  color: #F2C6C6;
+  color: #111;
 }
 
 .footer-bottom {
   text-align: center;
   padding-top: 20px;
-  border-top: 1px solid #333;
-  color: #666;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  color: #333;
 }
 
 .page-header {
-  background: #0B0B0B;
-  color: #fff;
+  background: #F2C6C6;
+  color: #111;
   padding: 60px 0;
   text-align: center;
 }
