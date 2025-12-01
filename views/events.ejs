@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events - Ella Rises</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>Events</h1>
+      <p style="opacity: 0.8;">Upcoming and past community events</p>
+    </div>
+  </div>
+
+  <section class="content-section">
+    <div class="container">
+      <% if (error_message) { %>
+      <div class="alert alert-error"><%= error_message %></div>
+      <% } %>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+        <form action="/events" method="GET" class="search-box" style="margin-bottom: 0;">
+          <input type="text" name="q" placeholder="Search events..." value="<%= q || '' %>">
+          <button type="submit" class="btn btn-secondary">Search</button>
+        </form>
+        <% if (canEdit) { %>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('addForm').style.display = document.getElementById('addForm').style.display === 'none' ? 'block' : 'none'">Add Event</button>
+        <% } %>
+      </div>
+
+      <% if (canEdit) { %>
+      <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
+        <h3 style="margin-bottom: 20px;">Add New Event</h3>
+        <form action="/events/add" method="POST">
+          <div class="form-group">
+            <label for="event_name">Event Name</label>
+            <input type="text" id="event_name" name="event_name" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="event_date">Event Date</label>
+              <input type="date" id="event_date" name="event_date" required>
+            </div>
+            <div class="form-group">
+              <label for="location">Location</label>
+              <input type="text" id="location" name="location">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Event</button>
+        </form>
+      </div>
+      <% } %>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Event Name</th>
+            <th>Date</th>
+            <th>Location</th>
+            <% if (canEdit) { %>
+            <th>Actions</th>
+            <% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (events.length === 0) { %>
+          <tr>
+            <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No events found.</td>
+          </tr>
+          <% } else { %>
+          <% events.forEach(e => { %>
+          <tr>
+            <td><%= e.id %></td>
+            <td><%= e.event_name %></td>
+            <td><%= e.event_date ? new Date(e.event_date).toLocaleDateString() : 'TBD' %></td>
+            <td><%= e.location || 'TBD' %></td>
+            <% if (canEdit) { %>
+            <td class="action-buttons">
+              <form action="/events/<%= e.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this event?')">
+                <button type="submit" class="btn-delete">Delete</button>
+              </form>
+            </td>
+            <% } %>
+          </tr>
+          <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

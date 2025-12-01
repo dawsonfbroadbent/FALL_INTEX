@@ -3,6 +3,27 @@ node_modules/
 
 # Environment files
 .env
+.env.local
+.env.*.local
 
-#Zip Files
+# Zip Files
 *.zip
+
+# Log files
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Replit
+.cache/
+.local/
+.upm/

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milestones - Ella Rises</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>Milestones</h1>
+      <p style="opacity: 0.8;">Track participant milestones and achievements</p>
+    </div>
+  </div>
+
+  <section class="content-section">
+    <div class="container">
+      <% if (error_message) { %>
+      <div class="alert alert-error"><%= error_message %></div>
+      <% } %>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+        <form action="/milestones" method="GET" class="search-box" style="margin-bottom: 0;">
+          <input type="text" name="participant_id" placeholder="Filter by Participant ID..." value="<%= participant_id || '' %>">
+          <button type="submit" class="btn btn-secondary">Filter</button>
+        </form>
+        <% if (canEdit) { %>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('addForm').style.display = document.getElementById('addForm').style.display === 'none' ? 'block' : 'none'">Add Milestone</button>
+        <% } %>
+      </div>
+
+      <% if (canEdit) { %>
+      <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
+        <h3 style="margin-bottom: 20px;">Add New Milestone</h3>
+        <form action="/milestones/add" method="POST">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="participant_id">Participant ID</label>
+              <input type="number" id="participant_id" name="participant_id" required value="<%= participant_id || '' %>">
+            </div>
+            <div class="form-group">
+              <label for="milestone_date">Milestone Date</label>
+              <input type="date" id="milestone_date" name="milestone_date" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <input type="text" id="description" name="description">
+          </div>
+          <button type="submit" class="btn btn-primary">Add Milestone</button>
+        </form>
+      </div>
+      <% } %>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Participant ID</th>
+            <th>Date</th>
+            <th>Description</th>
+            <% if (canEdit) { %>
+            <th>Actions</th>
+            <% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (milestones.length === 0) { %>
+          <tr>
+            <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No milestones found.</td>
+          </tr>
+          <% } else { %>
+          <% milestones.forEach(m => { %>
+          <tr>
+            <td><%= m.id %></td>
+            <td><%= m.participant_id %></td>
+            <td><%= m.milestone_date ? new Date(m.milestone_date).toLocaleDateString() : 'N/A' %></td>
+            <td><%= m.description || 'N/A' %></td>
+            <% if (canEdit) { %>
+            <td class="action-buttons">
+              <form action="/milestones/<%= m.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this milestone?')">
+                <button type="submit" class="btn-delete">Delete</button>
+              </form>
+            </td>
+            <% } %>
+          </tr>
+          <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

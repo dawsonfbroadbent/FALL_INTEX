@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surveys - Ella Rises</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>Surveys</h1>
+      <p style="opacity: 0.8;">Post-program surveys and feedback</p>
+    </div>
+  </div>
+
+  <section class="content-section">
+    <div class="container">
+      <% if (error_message) { %>
+      <div class="alert alert-error"><%= error_message %></div>
+      <% } %>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+        <form action="/surveys" method="GET" class="search-box" style="margin-bottom: 0;">
+          <input type="text" name="q" placeholder="Search surveys..." value="<%= q || '' %>">
+          <button type="submit" class="btn btn-secondary">Search</button>
+        </form>
+        <% if (canEdit) { %>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('addForm').style.display = document.getElementById('addForm').style.display === 'none' ? 'block' : 'none'">Add Survey</button>
+        <% } %>
+      </div>
+
+      <% if (canEdit) { %>
+      <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
+        <h3 style="margin-bottom: 20px;">Add New Survey</h3>
+        <form action="/surveys/add" method="POST">
+          <div class="form-group">
+            <label for="title">Survey Title</label>
+            <input type="text" id="title" name="title" required>
+          </div>
+          <div class="form-group">
+            <label for="participant_email">Participant Email</label>
+            <input type="email" id="participant_email" name="participant_email">
+          </div>
+          <button type="submit" class="btn btn-primary">Add Survey</button>
+        </form>
+      </div>
+      <% } %>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Participant Email</th>
+            <th>Created</th>
+            <% if (canEdit) { %>
+            <th>Actions</th>
+            <% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (surveys.length === 0) { %>
+          <tr>
+            <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No surveys found.</td>
+          </tr>
+          <% } else { %>
+          <% surveys.forEach(s => { %>
+          <tr>
+            <td><%= s.id %></td>
+            <td><%= s.title %></td>
+            <td><%= s.participant_email || 'N/A' %></td>
+            <td><%= s.created_at ? new Date(s.created_at).toLocaleDateString() : 'N/A' %></td>
+            <% if (canEdit) { %>
+            <td class="action-buttons">
+              <form action="/surveys/<%= s.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this survey?')">
+                <button type="submit" class="btn-delete">Delete</button>
+              </form>
+            </td>
+            <% } %>
+          </tr>
+          <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

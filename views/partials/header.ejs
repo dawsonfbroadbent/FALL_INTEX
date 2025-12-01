@@ -1,0 +1,24 @@
+<header>
+  <div class="container">
+    <a href="/" class="logo">
+      <img src="https://static.wixstatic.com/media/118ed8_519b33c09d2a4ba9aa0695b394f27772~mv2.png/v1/fill/w_950,h_950,al_c,q_90,enc_avif,quality_auto/118ed8_519b33c09d2a4ba9aa0695b394f27772~mv2.png" alt="Ella Rises Logo">
+    </a>
+    <nav>
+      <a href="/">Home</a>
+      <% if (session && session.isLoggedIn) { %>
+        <a href="/participants">Participants</a>
+        <a href="/events">Events</a>
+        <a href="/surveys">Surveys</a>
+        <a href="/milestones">Milestones</a>
+        <% if (session.level === 'manager' || session.level === 'Manager' || session.level === '1' || session.level === 'M') { %>
+          <a href="/users">Users</a>
+        <% } %>
+        <a href="/donations">Donations</a>
+        <a href="/logout">Logout (<%= session.username %>)</a>
+      <% } else { %>
+        <a href="/login">Login</a>
+      <% } %>
+      <a href="/donations" class="btn btn-primary">Donate</a>
+    </nav>
+  </div>
+</header>

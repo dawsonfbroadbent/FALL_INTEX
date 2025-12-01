@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donate - Ella Rises</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>Support Our Mission</h1>
+      <p style="opacity: 0.8;">Your donation helps us continue our vital work in the community.</p>
+    </div>
+  </div>
+
+  <section class="content-section">
+    <div class="container">
+      <% if (error_message) { %>
+      <div class="alert alert-error"><%= error_message %></div>
+      <% } %>
+
+      <% if (isPublic) { %>
+      <div class="donate-form card">
+        <h2 style="margin-bottom: 30px; text-align: center;">Make a Donation</h2>
+        
+        <form action="/donations/public" method="POST">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="donor_name">Your Name</label>
+              <input type="text" id="donor_name" name="donor_name" required>
+            </div>
+            <div class="form-group">
+              <label for="donor_email">Email Address</label>
+              <input type="email" id="donor_email" name="donor_email" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Select Amount</label>
+            <div class="donation-amounts">
+              <button type="button" onclick="setAmount(25)">$25</button>
+              <button type="button" onclick="setAmount(50)">$50</button>
+              <button type="button" onclick="setAmount(100)">$100</button>
+              <button type="button" onclick="setAmount(250)">$250</button>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="amount">Or Enter Custom Amount ($)</label>
+            <input type="number" id="amount" name="amount" min="1" step="0.01" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="donation_date">Date</label>
+            <input type="date" id="donation_date" name="donation_date" value="<%= new Date().toISOString().split('T')[0] %>">
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Donate Now</button>
+        </form>
+      </div>
+      <% } else { %>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2>Donation Records</h2>
+        <% if (canEdit) { %>
+        <a href="/donations" class="btn btn-primary">Add Donation</a>
+        <% } %>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Donor Name</th>
+            <th>Email</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <% if (canEdit) { %>
+            <th>Actions</th>
+            <% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (donations.length === 0) { %>
+          <tr>
+            <td colspan="<%= canEdit ? 6 : 5 %>" style="text-align: center; color: #666;">No donations yet.</td>
+          </tr>
+          <% } else { %>
+          <% donations.forEach(donation => { %>
+          <tr>
+            <td><%= donation.id %></td>
+            <td><%= donation.donor_name %></td>
+            <td><%= donation.donor_email %></td>
+            <td>$<%= donation.amount ? donation.amount.toFixed(2) : '0.00' %></td>
+            <td><%= donation.donation_date ? new Date(donation.donation_date).toLocaleDateString() : 'N/A' %></td>
+            <% if (canEdit) { %>
+            <td class="action-buttons">
+              <form action="/donations/<%= donation.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this donation?')">
+                <button type="submit" class="btn-delete">Delete</button>
+              </form>
+            </td>
+            <% } %>
+          </tr>
+          <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    function setAmount(value) {
+      document.getElementById('amount').value = value;
+      document.querySelectorAll('.donation-amounts button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

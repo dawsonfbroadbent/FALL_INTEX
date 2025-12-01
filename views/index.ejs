@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ella Rises - Empowering Communities</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <section class="hero">
+    <div class="container">
+      <h1>WELCOME TO ELLA RISES</h1>
+      <p>Empowering communities through sustainable food programs, education, and compassionate support for those in need.</p>
+      <div class="hero-buttons">
+        <a href="/donations" class="btn btn-primary">Donate Now</a>
+        <a href="/contact" class="btn btn-secondary">Get Involved</a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>Our Programs</h2>
+      <div class="programs-grid">
+        <div class="program-card">
+          <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=400" alt="Food Distribution">
+          <div class="program-card-content">
+            <h3>Food Distribution</h3>
+            <p>Providing nutritious meals and groceries to families facing food insecurity in our community.</p>
+            <a href="/participants" class="btn btn-secondary">Learn More</a>
+          </div>
+        </div>
+        <div class="program-card">
+          <img src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=400" alt="Youth Programs">
+          <div class="program-card-content">
+            <h3>Youth Programs</h3>
+            <p>Educational and mentorship programs designed to inspire and support the next generation.</p>
+            <a href="/events" class="btn btn-secondary">Learn More</a>
+          </div>
+        </div>
+        <div class="program-card">
+          <img src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=400" alt="Community Events">
+          <div class="program-card-content">
+            <h3>Community Events</h3>
+            <p>Building stronger communities through gatherings, workshops, and volunteer opportunities.</p>
+            <a href="/events" class="btn btn-secondary">Learn More</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-section">
+    <div class="container">
+      <div class="about-content">
+        <div>
+          <h2 style="text-align: left; margin-bottom: 20px;">About Our Mission</h2>
+          <p style="margin-bottom: 20px; color: #666;">At Ella Rises, we believe in the power of community and compassion. Our mission is to provide sustainable support to individuals and families in need, fostering independence and hope.</p>
+          <p style="margin-bottom: 20px; color: #666;">Through our various programs, we reach thousands of community members each year, providing not just food and resources, but also education, mentorship, and a path toward a brighter future.</p>
+          <a href="/contact" class="btn btn-dark">Contact Us</a>
+        </div>
+        <img src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=600" alt="Community">
+      </div>
+    </div>
+  </section>
+
+  <% if (session && session.isLoggedIn && counts) { %>
+  <section>
+    <div class="container">
+      <h2>Dashboard Overview</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3><%= counts.participants %></h3>
+          <p>Total Participants</p>
+        </div>
+        <div class="stat-card">
+          <h3><%= counts.events %></h3>
+          <p>Events Hosted</p>
+        </div>
+        <div class="stat-card">
+          <h3><%= counts.surveys %></h3>
+          <p>Surveys Completed</p>
+        </div>
+        <div class="stat-card">
+          <h3><%= counts.donations %></h3>
+          <p>Donations Received</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <% } %>
+
+  <% if (error_message) { %>
+  <section>
+    <div class="container">
+      <div class="alert alert-error"><%= error_message %></div>
+    </div>
+  </section>
+  <% } %>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

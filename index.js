@@ -14,18 +14,19 @@ const path = require("path");
 
 const knex = require("knex")({
   client: "pg",
-  connection: {
-    host: process.env.RDS_HOST || "localhost",
-    user: process.env.RDS_USER || "postgres",
-    password: process.env.RDS_PASSWORD || "admin",
-    database: process.env.RDS_NAME || "foodisus",
-    port: Number(process.env.RDS_PORT || 5432),
+  connection: process.env.DATABASE_URL || {
+    host: process.env.PGHOST || process.env.RDS_HOST || "localhost",
+    user: process.env.PGUSER || process.env.RDS_USER || "postgres",
+    password: process.env.PGPASSWORD || process.env.RDS_PASSWORD || "admin",
+    database: process.env.PGDATABASE || process.env.RDS_NAME || "foodisus",
+    port: Number(process.env.PGPORT || process.env.RDS_PORT || 5432),
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
   },
 });
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
+const host = "0.0.0.0";
 
 // ---- Express / EJS setup ----
 app.set("view engine", "ejs");
@@ -511,6 +512,6 @@ app.use((req, res) => {
 });
 
 // ---- Start server ----
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+app.listen(port, host, () => {
+  console.log(`Server running on http://${host}:${port}`);
 });
