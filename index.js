@@ -18,7 +18,7 @@ const knex = require("knex")({
     host: process.env.PGHOST || process.env.RDS_HOST || "localhost",
     user: process.env.PGUSER || process.env.RDS_USER || "postgres",
     password: process.env.PGPASSWORD || process.env.RDS_PASSWORD || "admin",
-    database: process.env.PGDATABASE || process.env.RDS_NAME || "foodisus",
+    database: process.env.PGDATABASE || process.env.RDS_NAME || "is403",
     port: Number(process.env.PGPORT || process.env.RDS_PORT || 5432),
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
   },
@@ -46,7 +46,7 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production", // true when HTTPS in production
+      secure: false, //process.env.NODE_ENV === "production", // true when HTTPS in production
       maxAge: 1000 * 60 * 60 * 6, // 6 hours
     },
   })
@@ -175,6 +175,10 @@ app.get("/logout", (req, res) => {
 // Redirect to Givebutter donation page
 app.get("/donate", (req, res) => {
   res.redirect(302, "https://givebutter.com/EllaRises");
+});
+
+app.get("/about", (req, res) => {
+  res.render("about", { error_message: "" });
 });
 
 // ---- Public Donations Page (accessible to ANY visitor) ----
