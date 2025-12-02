@@ -207,8 +207,17 @@ app.get("/donations", async (req, res) => {
 });
 
 //Get contact route
-app.get("/contact", (req, res) => {
-  res.render("contact", { error_message: "" })
+app.get('/contact', (req, res) => {
+  res.render('contact', {
+    session: req.session || {}
+  });
+});
+
+//Get Programs Route
+app.get('/programs', (req, res) => {
+  res.render('programs', {
+    session: req.session || {}
+  });
 });
 
 // Public donation submit (for donors/supporters). Adjust fields to match your DB columns.

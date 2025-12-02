@@ -750,3 +750,240 @@ tr:hover {
   outline-offset: 4px;
   border-radius: 8px;
 }
+
+/* ================================
+   ELLA RISES PROGRAMS PAGE (UNIQUE CLASSES)
+   ================================ */
+
+  .er-programs-page {
+  background: #fff;
+}
+
+/* Intro text under header */
+.er-programs-intro {
+  max-width: 880px;
+  margin: 0 auto 10px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #333;
+}
+
+/* Container that holds all program cards (stacked vertically) */
+.er-programs-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Individual program card */
+.er-program-card {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  align-items: center;
+  gap: 28px;
+  padding: 28px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.02);
+}
+  
+/* Alternate which side the images appear on (desktop and up) */
+@media (min-width: 900px) {
+  /* Even cards: adjust column widths so text gets the wider column */
+  .er-program-card:nth-child(even) {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); /* images narrow, text wide */
+  }
+
+  /* Even cards: image on the left, text on the right */
+  .er-program-card:nth-child(even) .er-program-content {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .er-program-card:nth-child(even) .er-program-images-container {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+
+/* Text column in each card */
+.er-program-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Program title */
+.er-program-title {
+  font-size: 26px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0 0 2px;
+}
+
+/* Small tag pill under the title */
+.er-program-tag {
+  display: inline-block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(242, 198, 198, 0.22); /* blush tint */
+  color: #444;
+  margin-bottom: 12px;
+}
+
+/* Metadata list (ages, schedule, fees, etc.) */
+.er-program-meta {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #444;
+}
+
+.er-program-meta li + li {
+  margin-top: 4px;
+}
+
+.er-program-note {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* Body paragraphs */
+.er-program-content p {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #333;
+}
+
+/* Emphasized callout paragraph */
+.er-program-callout {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-left: 3px solid #F1A6A0; /* warm peach */
+  background: #FFF7F5;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+/* Image column container - for vertical centering */
+.er-program-images-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image column */
+.er-program-images {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  max-width: 380px;   /* 🔹 cap width so even-card images aren't huge */
+  width: 100%;
+}
+
+/* Multi-image layout (STEAM, Summit) */
+.er-program-images-multi {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  align-content: start;
+  max-width: 420px;   /* 🔹 same idea: keep a comfortable max width */
+  width: 100%;
+}
+
+/* Multi-image layout (STEAM, Summit) */
+.er-program-images-multi {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  align-content: start;
+}
+
+/* Individual image wrapper */
+.er-program-image-wrapper {
+  overflow: hidden;
+  border-radius: 18px;
+  background: #f9f9f9;
+  position: relative;
+  /* Taller aspect ratio for single images to fill vertical space */
+  aspect-ratio: 5/6;
+}
+
+/* Multi-image wrapper - smaller aspect ratio */
+.er-program-images-multi .er-program-image-wrapper {
+  aspect-ratio: 1 / 1;
+}
+
+/* Make first image in multi-layout span full width */
+.er-program-images-multi .er-program-image-wrapper:first-child {
+  grid-column: 1 / -1;
+  aspect-ratio: 16 / 9;
+}
+
+/* Image styling */
+.er-program-image-wrapper img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 220ms ease-out;
+}
+
+.er-program-image-wrapper img:hover {
+  transform: scale(1.03);
+}
+
+/* -------- Responsive for Programs page -------- */
+@media (max-width: 960px) {
+  .er-program-card {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stack images below content on mobile */
+  .er-program-images {
+    order: 2;
+  }
+  
+  .er-program-content {
+    order: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .er-program-card {
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .er-program-title {
+    font-size: 22px;
+  }
+
+  /* Single column layout for multi-images on mobile */
+  .er-program-images-multi {
+    grid-template-columns: 1fr;
+  }
+
+  .er-program-images-multi .er-program-image-wrapper:first-child {
+    grid-column: 1;
+  }
+
+  /* Adjust aspect ratios for mobile */
+  .er-program-image-wrapper {
+    aspect-ratio: 16 / 10;
+  }
+
+  .er-program-images-multi .er-program-image-wrapper {
+    aspect-ratio: 16 / 10;
+  }
+}
