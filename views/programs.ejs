@@ -38,7 +38,7 @@
         <div class="container er-programs-grid">
 
         <!-- BALLET FOLKLORICO -->
-        <article class="er-program-card">
+        <article id="ballet-folklorico" class="er-program-card">
             <div class="er-program-content">
             <h2 class="er-program-title">Ballet Folklórico</h2>
             <div class="er-program-tag">Latin American Folk Dance</div>
@@ -83,7 +83,7 @@
         </article>
 
         <!-- MARIACHI -->
-        <article class="er-program-card">
+        <article id="mariachi" class="er-program-card">
             <div class="er-program-content">
             <h2 class="er-program-title">Mariachi</h2>
             <div class="er-program-tag">All-Female Mariachi Ensemble</div>
@@ -140,7 +140,7 @@
         </article>
 
         <!-- STEAM -->
-        <article class="er-program-card">
+        <article id="steam" class="er-program-card">
             <div class="er-program-content">
             <h2 class="er-program-title">STEAM Workshops</h2>
             <div class="er-program-tag">Science, Technology, Engineering, Art &amp; Math</div>
@@ -199,7 +199,7 @@
         </article>
 
         <!-- SUMMIT + EDUCATIONAL PATHWAYS -->
-        <article class="er-program-card">
+        <article id="summit" class="er-program-card">
             <div class="er-program-content">
             <h2 class="er-program-title">Summit + Educational Pathways</h2>
             <div class="er-program-tag">Day Camp &amp; College Exposure</div>
@@ -265,6 +265,32 @@
         </div>
     </section>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          if (!window.location.hash) return;
+      
+          const target = document.querySelector(window.location.hash);
+          if (!target) return;
+      
+          // Let the layout settle (images, fonts) so we calculate height correctly
+          setTimeout(function () {
+            const header = document.querySelector('header');
+            const headerHeight = header ? header.offsetHeight : 0;
+      
+            const rect = target.getBoundingClientRect();
+            const absoluteTop = rect.top + window.pageYOffset;
+            const elementCenter = absoluteTop + rect.height / 2;
+      
+            const scrollTop = elementCenter - (window.innerHeight / 2) - headerHeight / 2;
+      
+            window.scrollTo({
+              top: scrollTop,
+              behavior: 'smooth'
+            });
+          }, 50);
+        });
+      </script>
 
     <%- include('partials/footer') %>
 </body>

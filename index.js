@@ -209,7 +209,8 @@ app.get("/donations", async (req, res) => {
 //Get contact route
 app.get('/contact', (req, res) => {
   res.render('contact', {
-    session: req.session || {}
+    session: req.session || {},
+    error_message: ""
   });
 });
 
