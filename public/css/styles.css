@@ -31,6 +31,58 @@ header .container {
   justify-content: space-between;
 }
 
+/* Header nav polish (non-Donate links) */
+header nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Base nav links */
+header nav a {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  text-decoration: none;
+  color: #111;
+  padding: 10px 12px;
+  border-radius: 999px; /* pill */
+  transition: background 0.15s ease, transform 0.12s ease, opacity 0.15s ease;
+}
+
+/* Hover: soft pill background */
+header nav a:hover {
+  background: rgba(242, 198, 198, 0.35); /* blush */
+  transform: translateY(-1px);
+}
+
+/* Active page highlight (Express sets "active" class below) */
+header nav a.active {
+  background: rgba(242, 198, 198, 0.55);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+}
+
+/* Keep Donate looking like a button (don’t get pill hover styles) */
+header nav a.btn {
+  padding: 10px 16px; /* slightly larger */
+  border-radius: 14px; /* more "button" than pill */
+  background: #0B0B0B;
+  color: #fff;
+}
+
+header nav a.btn:hover {
+  background: #111;
+  transform: translateY(-1px);
+}
+
+/* Nice keyboard focus */
+header nav a:focus-visible {
+  outline: 2px solid rgba(241, 166, 160, 0.9);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
 .logo img {
   height: 60px;
 }
@@ -651,4 +703,50 @@ tr:hover {
   width: 100%;
   height: 500px;        /* adjust taller/shorter */
   background: url("/images/activities/participant_banner.avif") center/cover no-repeat;
+}
+
+/* TEAM BIOS - mobile stacking for alternating layout */
+@media (max-width: 820px) {
+  .team-section .card > div {
+    grid-template-columns: 1fr !important;
+  }
+
+  .team-section img {
+    max-width: 320px !important;
+    justify-self: start !important;
+  }
+}
+
+
+/* Team bio name + LinkedIn icon */
+.team-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.team-linkedin {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.team-linkedin img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  opacity: 0.9;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+
+.team-linkedin:hover img {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.team-linkedin:focus-visible {
+  outline: 2px solid rgba(241, 166, 160, 0.9); /* soft coral */
+  outline-offset: 4px;
+  border-radius: 8px;
 }
