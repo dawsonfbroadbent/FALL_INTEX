@@ -467,6 +467,30 @@ tr:hover {
   cursor: pointer;
 }
 
+/* Enroll Button Formatting */
+.enroll-cta {
+  text-align: center;
+  padding: 60px 0 00px;
+}
+
+.enroll-btn {
+  display: inline-block;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 16px 40px;
+  border-radius: 999px;             /* big pill shape */
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
+  text-transform: uppercase;
+}
+
+.enroll-btn:hover,
+.enroll-btn:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
