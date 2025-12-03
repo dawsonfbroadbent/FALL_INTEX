@@ -149,7 +149,7 @@ app.get("/donations", async (req, res) => {
     // Create donation object and push to donations array
     for (let iCount = 0; iCount < all.length; iCount++) {
       let donationDate = all[iCount].donationdate;
-      let formattedDate = new Date(donationDateRaw).toLocaleDateString("en-US", {
+      let formattedDate = new Date(donationDate).toLocaleDateString("en-US", {
           year: 'numeric',
           month: '2-digit',
           day: '2-digit'
