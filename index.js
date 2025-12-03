@@ -37,17 +37,11 @@ app.use(express.json());
 
 // ---- Sessions ----
 app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "fallback-secret-key",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-      maxAge: 1000 * 60 * 60 * 6, // 6 hours
-    },
-  })
+    session({
+      secret: process.env.SESSION_SECRET || 'fallback-secret-key',
+      resave: false,
+      saveUninitialized: false,
+    })
 );
 
 // app.use(flash()); // optional
