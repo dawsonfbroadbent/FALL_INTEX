@@ -138,17 +138,30 @@ app.get("/about", (req, res) => {
 
 // ---- Public Donations Page (accessible to ANY visitor) ----
 app.get("/donations", async (req, res) => {
-  // Public-facing donation page.
-  // If logged in, we can also show donation records.
   try {
     // Create donations array and fill with donation info from database if user is logged in
-    let donations = [];
-    if (req.session?.isLoggedIn) {
-      donations = await knex("donations").select("*").orderBy("donationdate", "desc");
+    let donationsArray = [];
+    let all = [];
+    if (req.session.isLoggedIn) {
+      all = await knex("donations").orderBy("donationdate", "desc");
     }
+
+    // Create donation object and push to donations array
+    for (let iCount = 0; iCount < all.length; iCount++) {
+      let donationDate = all[iCount].donationdate;
+      let donationAmount = all[iCount].donationamount;
+      let donor = await knex("participant").select("participantfirstname", "participantlastname").where({"participantid": all[iCount].participantid}).first();
+      let donorFullName = donor.participantfirstname + " " + donor.participantlastname;
+      donationsArray.push({
+        date: donationDate,
+        amount: donationAmount,
+        donor: donorFullName
+      });
+    };
+
     // Render donations page with permissions based on user logged in status and level
     res.render("donations", {
-      donations,
+      donationsArray,
       isPublic: !req.session?.isLoggedIn,
       canEdit: req.session?.isLoggedIn && isManager(req.session.level),
       error_message: "",
@@ -156,7 +169,7 @@ app.get("/donations", async (req, res) => {
   } catch (err) {
     // If error is caught, render donations page with error message
     res.render("donations", {
-      donations: [],
+      donationsArray: [],
       isPublic: !req.session?.isLoggedIn,
       canEdit: req.session?.isLoggedIn && isManager(req.session.level),
       error_message: err.message,

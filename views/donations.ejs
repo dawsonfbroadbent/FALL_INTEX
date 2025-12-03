@@ -73,9 +73,7 @@
       <table>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Donor Name</th>
-            <th>Email</th>
             <th>Amount</th>
             <th>Date</th>
             <% if (canEdit) { %>
@@ -89,13 +87,11 @@
             <td colspan="<%= canEdit ? 6 : 5 %>" style="text-align: center; color: #666;">No donations yet.</td>
           </tr>
           <% } else { %>
-          <% donations.forEach(donation => { %>
+          <% donationsArray.forEach(donation => { %>
           <tr>
-            <td><%= donation.id %></td>
-            <td><%= donation.donor_name %></td>
-            <td><%= donation.donor_email %></td>
-            <td>$<%= donation.amount ? donation.amount.toFixed(2) : '0.00' %></td>
-            <td><%= donation.donation_date ? new Date(donation.donation_date).toLocaleDateString() : 'N/A' %></td>
+            <td><%= donation.donor %></td>
+            <td>$<%= donation.amount %></td>
+            <td><%= donation.date %></td>
             <% if (canEdit) { %>
             <td class="action-buttons">
               <form action="/donations/<%= donation.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this donation?')">
