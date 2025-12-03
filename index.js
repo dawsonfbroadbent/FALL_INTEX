@@ -46,7 +46,7 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: false, //process.env.NODE_ENV === "production", // true when HTTPS in production
+      secure: true,
       maxAge: 1000 * 60 * 60 * 6, // 6 hours
     },
   })
@@ -65,8 +65,7 @@ function isManager(level) {
   // Accept a few common representations:
   // "manager", "Manager", 1, "1", "M"
   if (level === undefined || level === null) return false;
-  const v = String(level).trim().toLowerCase();
-  return v === "manager" || v === "m" || v === "1";
+  return String(level).trim() === "M";
 }
 
 function requireAuth(req, res, next) {
@@ -79,48 +78,9 @@ function requireManager(req, res, next) {
   return res.status(403).send("Forbidden: Manager access only.");
 }
 
-// ---- Public Landing Page (AUTO roots to index.ejs) ----
+// Root route that directs the user to the index.ejs page
 app.get("/", async (req, res) => {
-  // Public landing page for donors/supporters.
-  // If logged in, we also show lightweight dashboard counts.
-  try {
-    let counts = null;
-
-    if (req.session?.isLoggedIn) {
-      const [
-        participantsCount,
-        eventsCount,
-        surveysCount,
-        milestonesCount,
-        donationsCount,
-      ] = await Promise.all([
-        knex("participants").count("* as count").first(),
-        knex("events").count("* as count").first(),
-        knex("surveys").count("* as count").first(),
-        knex("milestones").count("* as count").first(),
-        knex("donations").count("* as count").first(),
-      ]);
-
-      counts = {
-        participants: Number(participantsCount?.count || 0),
-        events: Number(eventsCount?.count || 0),
-        surveys: Number(surveysCount?.count || 0),
-        milestones: Number(milestonesCount?.count || 0),
-        donations: Number(donationsCount?.count || 0),
-      };
-    }
-
-    res.render("index", {
-      counts, // your index.ejs can optionally display these
-      error_message: "",
-    });
-  } catch (err) {
-    // Still render landing page even if DB tables aren’t ready yet
-    res.render("index", {
-      counts: null,
-      error_message: `Database error on landing page: ${err.message}`,
-    });
-  }
+  res.render("index", { error_message: "" });
 });
 
 // Optional: separate internal dashboard route (if you want it)
@@ -129,16 +89,18 @@ app.get("/dashboard", requireAuth, async (req, res) => {
   return res.redirect("/");
 });
 
-// ---- Login / Logout ----
+// Login page route
 app.get("/login", (req, res) => {
   res.render("login", { error_message: "" });
 });
 
+// Login route that evalues input username and password against credentials stored in database
 app.post("/login", async (req, res) => {
-  const username = (req.body.username || "").trim();
-  const password = (req.body.password || "").trim();
+  const username = req.body.username.trim();
+  const password = req.body.password.trim();
 
   try {
+    // Search for the user in the database by username, amd check to make sure a user was returned
     const user = await knex("users")
       .select("id", "username", "password", "level")
       .where({ username })
@@ -148,35 +110,36 @@ app.post("/login", async (req, res) => {
       return res.render("login", { error_message: "Invalid login" });
     }
 
-    // NOTE: For extra credit, replace with bcrypt compare against hashed password
-    // const bcrypt = require("bcrypt");
-    // const ok = await bcrypt.compare(password, user.password);
+    // Check if password matches password in database associated with the user
     const ok = password === user.password;
-
     if (!ok) {
       return res.render("login", { error_message: "Invalid login" });
     }
 
+    // Set session variables according to user information
     req.session.isLoggedIn = true;
     req.session.userId = user.id;
     req.session.username = user.username;
     req.session.level = user.level;
 
-    return res.redirect("/"); // goes to landing page, now “logged-in”
+    // Go to landing page, now logged in
+    return res.redirect("/");
   } catch (err) {
     return res.render("login", { error_message: `Login error: ${err.message}` });
   }
 });
 
+// Logout route
 app.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/"));
 });
 
-// Redirect to Givebutter donation page
+// Donation page route
 app.get("/donate", (req, res) => {
-  res.redirect(302, "https://givebutter.com/EllaRises");
+  res.redirect(302, "https://givebutter.com/EllaRises"); // Build new page and redirect to it rather than use external page
 });
 
+// About page route
 app.get("/about", (req, res) => {
   res.render("about", { error_message: "" });
 });
@@ -186,10 +149,12 @@ app.get("/donations", async (req, res) => {
   // Public-facing donation page.
   // If logged in, we can also show donation records.
   try {
+    // Create donations array and fill with donation info from database if user is logged in
     let donations = [];
     if (req.session?.isLoggedIn) {
       donations = await knex("donations").select("*").orderBy("donation_date", "desc");
     }
+    // Render donations page with permissions based on user logged in status and level
     res.render("donations", {
       donations,
       isPublic: !req.session?.isLoggedIn,
@@ -197,6 +162,7 @@ app.get("/donations", async (req, res) => {
       error_message: "",
     });
   } catch (err) {
+    // If error is caught, render donations page with error message
     res.render("donations", {
       donations: [],
       isPublic: !req.session?.isLoggedIn,
@@ -206,18 +172,18 @@ app.get("/donations", async (req, res) => {
   }
 });
 
-//Get contact route
+// Contact page route
 app.get('/contact', (req, res) => {
   res.render('contact', {
-    session: req.session || {},
+    // session: req.session || {},
     error_message: ""
   });
 });
 
-//Get Programs Route
+// Programs page route
 app.get('/programs', (req, res) => {
   res.render('programs', {
-    session: req.session || {}
+    // session: req.session || {}
   });
 });
 
@@ -250,6 +216,7 @@ app.post("/donations/public", async (req, res) => {
 // Manager-only donation maintenance (example delete)
 app.post("/donations/:id/delete", requireAuth, requireManager, async (req, res) => {
   try {
+    // Delete donation record with associated ID from database and redirect to donations route
     await knex("donations").where({ id: req.params.id }).del();
     res.redirect("/donations");
   } catch (err) {
@@ -257,23 +224,24 @@ app.post("/donations/:id/delete", requireAuth, requireManager, async (req, res) 
   }
 });
 
-// ---- Authenticated Pages (Common can view, Manager can maintain) ----
+// Participants page route
 app.get("/participants", requireAuth, async (req, res) => {
   const q = (req.query.q || "").trim();
   try {
-    let query = knex("participants").select("*").orderBy("id", "asc");
+    let query = knex("participant").select("*").orderBy("id", "asc");
 
-    // Simple search (adjust columns to whatever you actually have)
+    // Search for participant if included in the request
     if (q) {
       query = query.where((b) => {
-        b.whereILike("first_name", `%${q}%`)
-          .orWhereILike("last_name", `%${q}%`)
-          .orWhereILike("email", `%${q}%`);
+        b.whereILike("participantfirstname", `%${q}%`)
+          .orWhereILike("participantlastname", `%${q}%`)
+          .orWhereILike("participantemail", `%${q}%`);
       });
     }
 
     const participants = await query;
 
+    // Render participants page with particpants information from database and access level information
     res.render("participants", {
       participants,
       q,
@@ -281,6 +249,7 @@ app.get("/participants", requireAuth, async (req, res) => {
       error_message: "",
     });
   } catch (err) {
+    // Render participants page with empty array and error message if error is caught
     res.render("participants", {
       participants: [],
       q,
@@ -292,7 +261,7 @@ app.get("/participants", requireAuth, async (req, res) => {
 
 app.post("/participants/add", requireAuth, requireManager, async (req, res) => {
   try {
-    await knex("participants").insert(req.body); // best practice: whitelist fields
+    await knex("participant").insert(req.body); // best practice: whitelist fields
     res.redirect("/participants");
   } catch (err) {
     res.status(500).send(err.message);
@@ -301,7 +270,7 @@ app.post("/participants/add", requireAuth, requireManager, async (req, res) => {
 
 app.post("/participants/:id/edit", requireAuth, requireManager, async (req, res) => {
   try {
-    await knex("participants").where({ id: req.params.id }).update(req.body);
+    await knex("participant").where({ id: req.params.id }).update(req.body);
     res.redirect("/participants");
   } catch (err) {
     res.status(500).send(err.message);
@@ -310,7 +279,7 @@ app.post("/participants/:id/edit", requireAuth, requireManager, async (req, res)
 
 app.post("/participants/:id/delete", requireAuth, requireManager, async (req, res) => {
   try {
-    await knex("participants").where({ id: req.params.id }).del();
+    await knex("participant").where({ id: req.params.id }).del();
     res.redirect("/participants");
   } catch (err) {
     res.status(500).send(err.message);
@@ -320,7 +289,7 @@ app.post("/participants/:id/delete", requireAuth, requireManager, async (req, re
 app.get("/events", requireAuth, async (req, res) => {
   const q = (req.query.q || "").trim();
   try {
-    let query = knex("events").select("*").orderBy("event_date", "desc");
+    let query = knex("eventoccurence").select("*").orderBy("event_date", "desc");
     if (q) {
       query = query.where((b) => {
         b.whereILike("event_name", `%${q}%`).orWhereILike("location", `%${q}%`);
@@ -374,7 +343,7 @@ app.post("/events/:id/delete", requireAuth, requireManager, async (req, res) => 
 app.get("/surveys", requireAuth, async (req, res) => {
   const q = (req.query.q || "").trim();
   try {
-    let query = knex("surveys").select("*").orderBy("created_at", "desc");
+    let query = knex("surveyresponse").select("*").orderBy("created_at", "desc");
     if (q) {
       query = query.where((b) => {
         b.whereILike("title", `%${q}%`).orWhereILike("participant_email", `%${q}%`);
@@ -400,7 +369,7 @@ app.get("/surveys", requireAuth, async (req, res) => {
 
 app.post("/surveys/add", requireAuth, requireManager, async (req, res) => {
   try {
-    await knex("surveys").insert(req.body);
+    await knex("surveyresponse").insert(req.body);
     res.redirect("/surveys");
   } catch (err) {
     res.status(500).send(err.message);
@@ -409,7 +378,7 @@ app.post("/surveys/add", requireAuth, requireManager, async (req, res) => {
 
 app.post("/surveys/:id/edit", requireAuth, requireManager, async (req, res) => {
   try {
-    await knex("surveys").where({ id: req.params.id }).update(req.body);
+    await knex("surveyresponse").where({ id: req.params.id }).update(req.body);
     res.redirect("/surveys");
   } catch (err) {
     res.status(500).send(err.message);
@@ -418,7 +387,7 @@ app.post("/surveys/:id/edit", requireAuth, requireManager, async (req, res) => {
 
 app.post("/surveys/:id/delete", requireAuth, requireManager, async (req, res) => {
   try {
-    await knex("surveys").where({ id: req.params.id }).del();
+    await knex("surveyresponse").where({ id: req.params.id }).del();
     res.redirect("/surveys");
   } catch (err) {
     res.status(500).send(err.message);

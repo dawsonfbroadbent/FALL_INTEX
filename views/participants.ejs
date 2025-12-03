@@ -75,10 +75,10 @@
           <% } else { %>
           <% participants.forEach(p => { %>
           <tr>
-            <td><%= p.id %></td>
-            <td><%= p.first_name %></td>
-            <td><%= p.last_name %></td>
-            <td><%= p.email || 'N/A' %></td>
+            <td><%= p.participantid %></td>
+            <td><%= p.participantfirstname %></td>
+            <td><%= p.participantlastname %></td>
+            <td><%= p.participantemail || 'N/A' %></td>
             <% if (canEdit) { %>
             <td class="action-buttons">
               <a href="/milestones?participant_id=<%= p.id %>" class="btn-edit">Milestones</a>
