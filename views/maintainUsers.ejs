@@ -46,8 +46,8 @@
           <div class="form-group">
             <label for="level">User Level</label>
             <select id="level" name="level" required>
-              <option value="user">Common User</option>
-              <option value="manager">Manager</option>
+              <option value="U">Common User</option>
+              <option value="M">Manager</option>
             </select>
           </div>
           <button type="submit" class="btn btn-primary">Add User</button>
@@ -57,7 +57,6 @@
       <table>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Username</th>
             <th>Level</th>
             <th>Actions</th>
@@ -71,7 +70,6 @@
           <% } else { %>
           <% users.forEach(u => { %>
           <tr>
-            <td><%= u.id %></td>
             <td><%= u.username %></td>
             <td><%= u.level %></td>
             <td class="action-buttons">

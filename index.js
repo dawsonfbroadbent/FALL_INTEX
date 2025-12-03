@@ -144,7 +144,7 @@ app.get("/donations", async (req, res) => {
     // Create donations array and fill with donation info from database if user is logged in
     let donations = [];
     if (req.session?.isLoggedIn) {
-      donations = await knex("donations").select("*").orderBy("donation_date", "desc");
+      donations = await knex("donations").select("*").orderBy("donationdate", "desc");
     }
     // Render donations page with permissions based on user logged in status and level
     res.render("donations", {
@@ -220,7 +220,7 @@ app.post("/donations/:id/delete", requireAuth, requireManager, async (req, res) 
 app.get("/participants", requireAuth, async (req, res) => {
   const q = (req.query.q || "").trim();
   try {
-    let query = knex("participant").select("*").orderBy("id", "asc");
+    let query = knex("participant").select("*").orderBy("participantid", "asc");
 
     // Search for participant if included in the request
     if (q) {
@@ -290,7 +290,7 @@ app.get("/events", requireAuth, async (req, res) => {
   const q = (req.query.q || "").trim();
   try {
     // Retrieve events from evenoccurrence table (if request includes search, incldue in knex query)
-    let query = knex("eventoccurrence").select("*").orderBy("event_date", "desc");
+    let query = knex("eventoccurrence").select("*").orderBy("eventdatetimestart", "desc");
     if (q) {
       query = query.where((b) => {
         b.whereILike("eventname", `%${q}%`).orWhereILike("eventlocation", `%${q}%`);
