@@ -149,11 +149,16 @@ app.get("/donations", async (req, res) => {
     // Create donation object and push to donations array
     for (let iCount = 0; iCount < all.length; iCount++) {
       let donationDate = all[iCount].donationdate;
+      let formattedDate = new Date(donationDateRaw).toLocaleDateString("en-US", {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+      });
       let donationAmount = all[iCount].donationamount;
       let donor = await knex("participant").select("participantfirstname", "participantlastname").where({"participantid": all[iCount].participantid}).first();
       let donorFullName = donor.participantfirstname + " " + donor.participantlastname;
       donations.push({
-        date: new Date(donationDate).toLocaleDateString(),
+        date: formattedDate,
         amount: donationAmount,
         donor: donorFullName
       });
