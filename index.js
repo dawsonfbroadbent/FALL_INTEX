@@ -35,10 +35,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// app.use(helmet()); // optional
-
-app.set('trust proxy', 1);
-
 // ---- Sessions ----
 app.use(
   session({
@@ -48,7 +44,7 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
+      secure: false,
       maxAge: 1000 * 60 * 60 * 6, // 6 hours
     },
   })
@@ -82,9 +78,6 @@ function requireManager(req, res, next) {
 
 // Root route that directs the user to the index.ejs page
 app.get("/", async (req, res) => {
-  console.log("Index page - Session:", req.session);
-  console.log("Index page - Session ID:", req.sessionID);
-  console.log("Index page - isLoggedIn:", req.session?.isLoggedIn);
   res.render("index", { error_message: "" });
 });
 
@@ -126,9 +119,6 @@ app.post("/login", async (req, res) => {
     req.session.userId = user.id;
     req.session.username = user.username;
     req.session.level = user.level;
-
-    console.log("Session set:", req.session);
-    console.log("Session ID:", req.sessionID);
 
     // Go to landing page, now logged in
     return res.redirect("/");
