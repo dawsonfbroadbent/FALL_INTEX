@@ -37,6 +37,8 @@ app.use(express.json());
 
 // app.use(helmet()); // optional
 
+app.set('trust proxy', 1);
+
 // ---- Sessions ----
 app.use(
   session({
@@ -46,7 +48,7 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
+      secure: false,
       maxAge: 1000 * 60 * 60 * 6, // 6 hours
     },
   })
@@ -100,7 +102,7 @@ app.post("/login", async (req, res) => {
   const password = req.body.password.trim();
 
   try {
-    // Search for the user in the database by username, amd check to make sure a user was returned
+    // Search for the user in the database by username, and check to make sure a user was returned
     const user = await knex("users")
       .select("id", "username", "password", "level")
       .where({ username })
