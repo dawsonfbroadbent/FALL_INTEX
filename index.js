@@ -140,7 +140,7 @@ app.get("/about", (req, res) => {
 app.get("/donations", async (req, res) => {
   try {
     // Create donations array and fill with donation info from database if user is logged in
-    let donationsArray = [];
+    let donations = [];
     let all = [];
     if (req.session.isLoggedIn) {
       all = await knex("donations").orderBy("donationdate", "desc");
@@ -152,8 +152,8 @@ app.get("/donations", async (req, res) => {
       let donationAmount = all[iCount].donationamount;
       let donor = await knex("participant").select("participantfirstname", "participantlastname").where({"participantid": all[iCount].participantid}).first();
       let donorFullName = donor.participantfirstname + " " + donor.participantlastname;
-      donationsArray.push({
-        date: donationDate,
+      donations.push({
+        date: new Date(donationDate).toLocaleDateString(),
         amount: donationAmount,
         donor: donorFullName
       });
@@ -161,7 +161,7 @@ app.get("/donations", async (req, res) => {
 
     // Render donations page with permissions based on user logged in status and level
     res.render("donations", {
-      donationsArray,
+      donations,
       isPublic: !req.session?.isLoggedIn,
       canEdit: req.session?.isLoggedIn && isManager(req.session.level),
       error_message: "",
@@ -169,7 +169,7 @@ app.get("/donations", async (req, res) => {
   } catch (err) {
     // If error is caught, render donations page with error message
     res.render("donations", {
-      donationsArray: [],
+      donations: [],
       isPublic: !req.session?.isLoggedIn,
       canEdit: req.session?.isLoggedIn && isManager(req.session.level),
       error_message: err.message,

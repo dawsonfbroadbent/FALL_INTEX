@@ -87,7 +87,7 @@
             <td colspan="<%= canEdit ? 6 : 5 %>" style="text-align: center; color: #666;">No donations yet.</td>
           </tr>
           <% } else { %>
-          <% donationsArray.forEach(donation => { %>
+          <% donations.forEach(donation => { %>
           <tr>
             <td><%= donation.donor %></td>
             <td>$<%= donation.amount %></td>

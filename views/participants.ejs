@@ -58,7 +58,6 @@
       <table>
         <thead>
           <tr>
-            <th>ID</th>
             <th>First Name</th>
             <th>Last Name</th>
             <th>Email</th>
@@ -75,7 +74,6 @@
           <% } else { %>
           <% participants.forEach(p => { %>
           <tr>
-            <td><%= p.participantid %></td>
             <td><%= p.participantfirstname %></td>
             <td><%= p.participantlastname %></td>
             <td><%= p.participantemail || 'N/A' %></td>
