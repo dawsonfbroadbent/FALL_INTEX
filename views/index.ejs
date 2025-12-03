@@ -130,32 +130,6 @@
         </div>
     </section>
 
-    <% if (session && session.isLoggedIn && counts) { %>
-    <section>
-    <div class="container">
-        <h2>Dashboard Overview</h2>
-        <div class="stats-grid">
-        <div class="stat-card">
-            <h3><%= counts.participants %></h3>
-            <p>Total Participants</p>
-        </div>
-        <div class="stat-card">
-            <h3><%= counts.events %></h3>
-            <p>Events Hosted</p>
-        </div>
-        <div class="stat-card">
-            <h3><%= counts.surveys %></h3>
-            <p>Surveys Completed</p>
-        </div>
-        <div class="stat-card">
-            <h3><%= counts.donations %></h3>
-            <p>Donations Received</p>
-        </div>
-        </div>
-    </div>
-    </section>
-    <% } %>
-
     <% if (error_message) { %>
     <section>
     <div class="container">
