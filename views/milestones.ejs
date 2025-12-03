@@ -24,8 +24,8 @@
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
         <form action="/milestones" method="GET" class="search-box" style="margin-bottom: 0;">
-          <input type="text" name="participant_id" placeholder="Filter by Participant ID..." value="<%= participant_id || '' %>">
-          <button type="submit" class="btn btn-secondary">Filter</button>
+          <input type="text" name="q" placeholder="Search..." value="<%= q || '' %>">
+          <button type="submit" class="btn btn-secondary">Search</button>
         </form>
         <% if (canEdit) { %>
         <button type="button" class="btn btn-primary" onclick="document.getElementById('addForm').style.display = document.getElementById('addForm').style.display === 'none' ? 'block' : 'none'">Add Milestone</button>

@@ -259,6 +259,9 @@ app.get("/participants", requireAuth, async (req, res) => {
   }
 });
 
+/*
+We need to change this to redirect to another ejs file
+*/
 app.post("/participants/add", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("participant").insert(req.body); // best practice: whitelist fields
@@ -268,6 +271,9 @@ app.post("/participants/add", requireAuth, requireManager, async (req, res) => {
   }
 });
 
+/*
+We need to change this to redirect to another ejs file
+*/
 app.post("/participants/:id/edit", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("participant").where({ id: req.params.id }).update(req.body);
@@ -277,6 +283,7 @@ app.post("/participants/:id/edit", requireAuth, requireManager, async (req, res)
   }
 });
 
+// Delete participant route
 app.post("/participants/:id/delete", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("participant").where({ id: req.params.id }).del();
@@ -286,17 +293,20 @@ app.post("/participants/:id/delete", requireAuth, requireManager, async (req, re
   }
 });
 
+// Events page route
 app.get("/events", requireAuth, async (req, res) => {
   const q = (req.query.q || "").trim();
   try {
-    let query = knex("eventoccurence").select("*").orderBy("event_date", "desc");
+    // Retrieve events from evenoccurrence table (if request includes search, incldue in knex query)
+    let query = knex("eventoccurrence").select("*").orderBy("event_date", "desc");
     if (q) {
       query = query.where((b) => {
-        b.whereILike("event_name", `%${q}%`).orWhereILike("location", `%${q}%`);
+        b.whereILike("eventname", `%${q}%`).orWhereILike("eventlocation", `%${q}%`);
       });
     }
     const events = await query;
 
+    // Render events page with array of events and user level information
     res.render("events", {
       events,
       q,
@@ -304,6 +314,7 @@ app.get("/events", requireAuth, async (req, res) => {
       error_message: "",
     });
   } catch (err) {
+    // If error is caught, render events page with empty array of events and an error message
     res.render("events", {
       events: [],
       q,
@@ -313,6 +324,9 @@ app.get("/events", requireAuth, async (req, res) => {
   }
 });
 
+/*
+We need to change this to redirect to another ejs file
+*/
 app.post("/events/add", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("events").insert(req.body);
@@ -322,6 +336,9 @@ app.post("/events/add", requireAuth, requireManager, async (req, res) => {
   }
 });
 
+/*
+We need to change this to redirect to another ejs file
+*/
 app.post("/events/:id/edit", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("events").where({ id: req.params.id }).update(req.body);
@@ -331,6 +348,7 @@ app.post("/events/:id/edit", requireAuth, requireManager, async (req, res) => {
   }
 });
 
+// Delete event route
 app.post("/events/:id/delete", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("events").where({ id: req.params.id }).del();
@@ -340,17 +358,23 @@ app.post("/events/:id/delete", requireAuth, requireManager, async (req, res) => 
   }
 });
 
+// Survey page route
 app.get("/surveys", requireAuth, async (req, res) => {
+  // Retrive survey responses from database (if request includes search, incldue in knex query)
   const q = (req.query.q || "").trim();
   try {
-    let query = knex("surveyresponse").select("*").orderBy("created_at", "desc");
+    let query = knex("surveyresponse").select("*").orderBy("surveysubmissiondate", "desc");
     if (q) {
-      query = query.where((b) => {
-        b.whereILike("title", `%${q}%`).orWhereILike("participant_email", `%${q}%`);
+      query = query
+      .join("participant", 'surveyresponse.participantid', 'participant.participantid')
+      .join("eventoccurrence", 'surveyresponse.eventid', 'eventoccurrence.eventid').where((b) => {
+        b.whereILike("participant.participantemail", `%${q}%`).orWhereILike("eventoccurrence.eventname", `%${q}%`)
+        .orWhereILike("eventoccurrence.eventlocation", `%${q}%`);
       });
     }
     const surveys = await query;
 
+    // Render surveys page with array of survey responses
     res.render("surveys", {
       surveys,
       q,
@@ -358,6 +382,7 @@ app.get("/surveys", requireAuth, async (req, res) => {
       error_message: "",
     });
   } catch (err) {
+    // Render surveys page with empty array and an error message
     res.render("surveys", {
       surveys: [],
       q,
@@ -367,6 +392,9 @@ app.get("/surveys", requireAuth, async (req, res) => {
   }
 });
 
+/*
+We need to change this to redirect to another ejs file
+*/
 app.post("/surveys/add", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("surveyresponse").insert(req.body);
@@ -376,6 +404,9 @@ app.post("/surveys/add", requireAuth, requireManager, async (req, res) => {
   }
 });
 
+/*
+We need to change this to redirect to another ejs file
+*/
 app.post("/surveys/:id/edit", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("surveyresponse").where({ id: req.params.id }).update(req.body);
@@ -385,6 +416,7 @@ app.post("/surveys/:id/edit", requireAuth, requireManager, async (req, res) => {
   }
 });
 
+// Delete survey response route
 app.post("/surveys/:id/delete", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("surveyresponse").where({ id: req.params.id }).del();
@@ -396,13 +428,19 @@ app.post("/surveys/:id/delete", requireAuth, requireManager, async (req, res) =>
 
 // Milestones (1-to-many with participants)
 app.get("/milestones", requireAuth, async (req, res) => {
-  const participantId = req.query.participant_id; // optional filter
+  const participantId = req.query.participant_id;
+  const q = (req.query.q || "").trim();
   try {
+    // Get all milestones from database (search for individual's milestones if included in request)
     let query = knex("milestones").select("*").orderBy("milestone_date", "desc");
-    if (participantId) query = query.where({ participant_id: participantId });
-
+    if (participantId) query = query
+    .join("participant", 'milestones.participantid', 'participant.participantid')
+    .where((b) => {
+      b.whereILike("participant.participantemail", `%${q}%`).orWhereILike("participant.participantfirstname", `%${q}%`)
+      .orWhereILike("participant.participantlastname", `%${q}%`).orWhereILike("milestones.milestonetitle", `%${q}%`)});
     const milestones = await query;
 
+    // Render milestones page with array of milestones and user access level
     res.render("milestones", {
       milestones,
       participant_id: participantId || "",
@@ -410,6 +448,7 @@ app.get("/milestones", requireAuth, async (req, res) => {
       error_message: "",
     });
   } catch (err) {
+    // Render milestones page with empty array and an error message
     res.render("milestones", {
       milestones: [],
       participant_id: participantId || "",
@@ -419,6 +458,9 @@ app.get("/milestones", requireAuth, async (req, res) => {
   }
 });
 
+/*
+We need to change this to redirect to another ejs file
+*/
 app.post("/milestones/add", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("milestones").insert(req.body);
@@ -428,6 +470,9 @@ app.post("/milestones/add", requireAuth, requireManager, async (req, res) => {
   }
 });
 
+/*
+We need to change this to redirect to another ejs file
+*/
 app.post("/milestones/:id/edit", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("milestones").where({ id: req.params.id }).update(req.body);
@@ -437,6 +482,7 @@ app.post("/milestones/:id/edit", requireAuth, requireManager, async (req, res) =
   }
 });
 
+// Delete milestone route
 app.post("/milestones/:id/delete", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("milestones").where({ id: req.params.id }).del();
@@ -446,22 +492,28 @@ app.post("/milestones/:id/delete", requireAuth, requireManager, async (req, res)
   }
 });
 
-// ---- Manager-only User Maintenance ----
+// Users page route
 app.get("/users", requireAuth, requireManager, async (req, res) => {
   const q = (req.query.q || "").trim();
   try {
+    // Get array of users from database (search by username if included in request)
     let query = knex("users").select("id", "username", "level").orderBy("username", "asc");
     if (q) {
       query = query.whereILike("username", `%${q}%`);
     }
     const users = await query;
 
+    // Render maintainUsers page with array of users
     res.render("maintainUsers", { users, q, error_message: "" });
   } catch (err) {
+    // Render maintainUsers page with an error message
     res.render("maintainUsers", { users: [], q, error_message: err.message });
   }
 });
 
+/*
+We need to change this to redirect to another ejs file
+*/
 app.post("/users/add", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("users").insert(req.body); // best practice: whitelist fields
@@ -471,6 +523,9 @@ app.post("/users/add", requireAuth, requireManager, async (req, res) => {
   }
 });
 
+/*
+We need to change this to redirect to another ejs file
+*/
 app.post("/users/:id/edit", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("users").where({ id: req.params.id }).update(req.body);
@@ -480,6 +535,7 @@ app.post("/users/:id/edit", requireAuth, requireManager, async (req, res) => {
   }
 });
 
+// Delete user route
 app.post("/users/:id/delete", requireAuth, requireManager, async (req, res) => {
   try {
     await knex("users").where({ id: req.params.id }).del();
@@ -489,9 +545,9 @@ app.post("/users/:id/delete", requireAuth, requireManager, async (req, res) => {
   }
 });
 
-// ---- HTTP 418 route (rubric) ----
+// ---- HTTP 418 route ----
 app.get("/teapot", (req, res) => {
-  res.status(418).send("I’m a teapot. ☕");
+  res.status(418).send("I'm a teapot. ☕");
 });
 
 // ---- 404 ----
