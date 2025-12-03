@@ -15,10 +15,10 @@ const path = require("path");
 const knex = require("knex")({
   client: "pg",
   connection: process.env.DATABASE_URL || {
-    host: process.env.PGHOST || process.env.RDS_HOST || "localhost",
-    user: process.env.PGUSER || process.env.RDS_USER || "postgres",
+    host: process.env.PGHOST || process.env.RDS_HOSTNAME || "localhost",
+    user: process.env.PGUSER || process.env.RDS_USERNAME || "postgres",
     password: process.env.PGPASSWORD || process.env.RDS_PASSWORD || "admin",
-    database: process.env.PGDATABASE || process.env.RDS_NAME || "is403",
+    database: process.env.PGDATABASE || process.env.RDS_DB_NAME || "is403",
     port: Number(process.env.PGPORT || process.env.RDS_PORT || 5432),
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
   },
