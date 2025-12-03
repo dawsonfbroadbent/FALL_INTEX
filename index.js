@@ -143,7 +143,7 @@ app.get("/donations", async (req, res) => {
     let donations = [];
     let all = [];
     if (req.session.isLoggedIn) {
-      all = await knex("donations").orderBy("donationdate", "desc");
+      all = await knex("donations").orderBy("participantid");
     }
 
     // Create donation object and push to donations array
