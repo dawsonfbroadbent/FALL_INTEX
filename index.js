@@ -443,7 +443,7 @@ app.post("/surveys/:id/delete", requireAuth, requireManager, async (req, res) =>
 
 // Milestones (1-to-many with participants)
 app.get("/milestones", requireAuth, async (req, res) => {
-  const participantId = req.query.participant_id;
+  const participantId = req.query.participantid;
   const q = (req.query.q || "").trim();
   try {
     // Get all milestones from database (search for individual's milestones if included in request)
@@ -454,7 +454,7 @@ app.get("/milestones", requireAuth, async (req, res) => {
       b.whereILike("participant.participantemail", `%${q}%`).orWhereILike("participant.participantfirstname", `%${q}%`)
       .orWhereILike("participant.participantlastname", `%${q}%`).orWhereILike("milestones.milestonetitle", `%${q}%`)});
     const all = await query;
-    
+
     let milestones = [];
     for (let iCount = 0; iCount < all.length; iCount++) {
       let milestoneDate = all[iCount].milestonedate;
@@ -476,7 +476,7 @@ app.get("/milestones", requireAuth, async (req, res) => {
     // Render milestones page with array of milestones and user access level
     res.render("milestones", {
       milestones,
-      participant_id: participantId || "",
+      participantid: participantId || "",
       canEdit: isManager(req.session.level),
       error_message: "",
     });
@@ -484,7 +484,7 @@ app.get("/milestones", requireAuth, async (req, res) => {
     // Render milestones page with empty array and an error message
     res.render("milestones", {
       milestones: [],
-      participant_id: participantId || "",
+      participantid: participantId || "",
       canEdit: isManager(req.session.level),
       error_message: err.message,
     });
