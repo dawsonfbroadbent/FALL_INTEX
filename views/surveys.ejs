@@ -49,18 +49,30 @@
       </div>
       <% } %>
 
+      <div class="score-legend" aria-label="Score legend">
+        <span class="legend-title">Scores Legend:</span>
+        <span class="legend-item"><span class="legend-badge">S</span> Satisfaction</span>
+        <span class="legend-item"><span class="legend-badge">U</span> Usefulness</span>
+        <span class="legend-item"><span class="legend-badge">I</span> Instructor</span>
+        <span class="legend-item"><span class="legend-badge">R</span> Recommendation</span>
+        <span class="legend-item"><span class="legend-badge">O</span> Overall</span>
+        <% if (canEdit) { %>
+          <span class="legend-item"><span class="legend-badge">NPS</span> Net Promoter Score</span>
+        <% } %>
+      </div>
+      
       <table>
         <thead>
           <tr>
-            <th>Participant Name</th>
+            <th>Participant</th>
             <th>Event Name</th>
-            <th>Satisfaction Score</th>
-            <th>Usefulness Score</th>
-            <th>Instructor Score</th>
-            <th>Recommendation Score</th>
-            <th>Overall Score</th>
+            <th>S</th>
+            <th>U</th>
+            <th>I</th>
+            <th>R</th>
+            <th>O</th>
             <% if (canEdit) { %>
-            <th>Net Promoter Score</th>
+            <th>NPS</th>
             <% } %>
             <th>Comments</th>
             <th>Survey Date</th>
@@ -75,7 +87,7 @@
             <td colspan="<%= canEdit ? 10 : 9 %>" style="text-align: center; color: #666;">No surveys found.</td>
           </tr>
           <% } else { %>
-          <% surveys.forEach(s => { %>
+          <% surveys.forEach((s, index) => { %>
           <tr>
             <td><%= s.participantname %></td>
             <td><%= s.eventname %></td>
@@ -87,7 +99,20 @@
             <% if (canEdit) { %>
             <td><%= s.surveynpsbucket %></td>
             <% } %>
-            <td><%= s.surveycomments %></td>
+            <td class="comments-cell">
+              <% if (s.surveycomments && s.surveycomments.length > 100) { %>
+                <div class="comment-text truncated" id="comment-<%= index %>">
+                  <%= s.surveycomments %>
+                </div>
+                <button class="comment-toggle" onclick="toggleComment(<%= index %>)">
+                  Read more
+                </button>
+              <% } else { %>
+                <div class="comment-text">
+                  <%= s.surveycomments || 'N/A' %>
+                </div>
+              <% } %>
+            </td>
             <td><%= s.surveysubmissiondate ? new Date(s.surveysubmissiondate).toLocaleDateString() : 'N/A' %></td>
             <% if (canEdit) { %>
             <td class="action-buttons">
@@ -105,5 +130,20 @@
   </section>
 
   <%- include('partials/footer') %>
+
+  <script>
+    function toggleComment(index) {
+      const commentDiv = document.getElementById('comment-' + index);
+      const button = commentDiv.nextElementSibling;
+      
+      if (commentDiv.classList.contains('truncated')) {
+        commentDiv.classList.remove('truncated');
+        button.textContent = 'Read less';
+      } else {
+        commentDiv.classList.add('truncated');
+        button.textContent = 'Read more';
+      }
+    }
+  </script>
 </body>
 </html>
