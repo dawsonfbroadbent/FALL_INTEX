@@ -1290,3 +1290,35 @@ tr:hover {
   font-weight: 700;
 }
 
+/* Milestones button (blush) */
+.btn-milestones{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px 10px;
+  border-radius:8px;
+  font-weight:700;
+  font-size:12px;
+  line-height:1;
+  text-decoration:none;
+  cursor:pointer;
+
+  background:#FDF1F1;      /* blush */
+  border:1px solid #E7B1B1; /* slightly deeper blush border */
+  color:#111;
+}
+
+.btn-milestones:hover{
+  background:#F6D0CF;       /* a touch lighter */
+  border-color:#E7B1B1;
+  text-decoration:none;
+}
+
+.btn-milestones:active{
+  transform:translateY(1px);
+}
+
+.btn-milestones:focus-visible{
+  outline:3px solid rgba(242,198,198,0.6);
+  outline-offset:2px;
+}

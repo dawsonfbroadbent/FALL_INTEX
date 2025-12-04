@@ -136,7 +136,7 @@
               <td><%= p.participantrole %></td>
               <% if (canEdit) { %>
               <td class="action-buttons">
-                <a href="/milestones?participantid=<%= p.participantid %>" class="btn-edit">Milestones</a>
+                <a href="/milestones?participantid=<%= p.participantid %>" class="btn-milestones">Milestones</a>
                 <button type="button" class="btn-edit" onclick="openEditModal(this)"
                   data-participantid="<%= p.participantid %>"
                   data-firstname="<%= p.participantfirstname %>"
