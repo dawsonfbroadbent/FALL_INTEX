@@ -357,34 +357,50 @@ app.post("/participants/:participantid/delete", requireAuth, requireAdmin, async
   }
 });
 
-// Events page route
+// Event occurrence page route
 app.get("/events", requireAuth, async (req, res) => {
   const q = (req.query.q || "").trim();
+  const error_message = req.query.error_message || "";
+
   try {
-    // Retrieve events from evenoccurrence table (if request includes search, incldue in knex query)
     let query = knex("eventoccurrence").select("*").orderBy("eventdatetimestart", "desc");
     if (q) {
       query = query.where((b) => {
         b.whereILike("eventname", `%${q}%`).orWhereILike("eventlocation", `%${q}%`);
       });
     }
-    const events = await query;
 
-    const eventtemplates = await knex("eventtemplate").select("eventname").orderBy("eventname")
+    const [events, eventtemplates, locations] = await Promise.all([
+      query,
+      knex("eventtemplate").select("eventname").orderBy("eventname"),
+      knex("locationcapacity")
+        .distinct("eventlocation")
+        .whereNotNull("eventlocation")
+        .orderBy("eventlocation"),
+    ]);
 
-    // Render events page with array of events and user level information
     res.render("events", {
       events,
       eventtemplates,
+      locations,
       q,
       canEdit: isAdmin(req.session.level),
-      error_message: "",
+      error_message,
     });
   } catch (err) {
-    // If error is caught, render events page with empty array of events and an error message
+    // keep page renderable even on error
+    const [eventtemplates, locations] = await Promise.all([
+      knex("eventtemplate").select("eventname").orderBy("eventname"),
+      knex("locationcapacity")
+        .distinct("eventlocation")
+        .whereNotNull("eventlocation")
+        .orderBy("eventlocation"),
+    ]);
+
     res.render("events", {
       events: [],
       eventtemplates,
+      locations,
       q,
       canEdit: isAdmin(req.session.level),
       error_message: err.message,
@@ -401,26 +417,48 @@ app.post("/events/add", requireAuth, requireAdmin, async (req, res) => {
     let eventlocation = req.body.eventlocation;
     let eventregistrationdeadline = req.body.eventregistrationdeadline;
     let newEvent = {eventname, eventdatetimestart, eventdatetimeend, eventlocation, eventregistrationdeadline};
-    await knex("events").insert(newEvent);
+    await knex("eventoccurrence").insert(newEvent);
     res.redirect("/events");
   } catch (err) {
     res.status(500).send(err.message);
   }
 });
 
-/*
-We need to change this to redirect to another ejs file
-*/
+//Edit Event Occurrence Route
 app.post("/events/:eventid/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("events").where({ "eventid": req.params.eventid }).update(req.body);
+    const id = req.params.eventid;
+    const {
+      eventname,
+      eventdatetimestart,
+      eventdatetimeend,
+      eventlocation,
+      eventregistrationdeadline
+    } = req.body;
+
+    console.log("Editing event ID:", id); // Debug log
+    console.log("Request body:", req.body); // Debug log
+
+    const updated = await knex("eventoccurrence")
+      .where({ eventid: id })
+      .update({
+        eventname,
+        eventdatetimestart,
+        eventdatetimeend,
+        eventlocation,
+        eventregistrationdeadline
+      });
+
+    console.log(`Updated ${updated} event(s)`); // Debug log
+
     res.redirect("/events");
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error("Error updating event:", err);
+    res.redirect("/events?error_message=" + encodeURIComponent("Failed to update event."));
   }
 });
 
-// Delete event route
+// Delete event occurrence route
 app.post("/events/:eventid/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("eventoccurrence").where({ "eventid": req.params.eventid }).del();
