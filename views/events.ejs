@@ -38,16 +38,31 @@
         <form action="/events/add" method="POST">
           <div class="form-group">
             <label for="event_name">Event Name</label>
-            <input type="text" id="event_name" name="event_name" required>
+            <select id="event_name" name="event_name" required>
+              <option value="">Select an event...</option>
+              <% eventTemplates.forEach(function(template) { %>
+                <option value="<%= template.eventname %>"><%= template.eventname %></option>
+              <% }); %>
+            </select>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="event_date">Event Date</label>
-              <input type="date" id="event_date" name="event_date" required>
+              <label for="eventdatetimestart">Start Date and Time</label>
+              <input type="datetime" id="eventdatetimestart" name="eventdatetimestart" required>
             </div>
             <div class="form-group">
-              <label for="location">Location</label>
-              <input type="text" id="location" name="location">
+              <label for="eventdatetimeend">End Date and Time</label>
+              <input type="datetime" id="eventdatetimeend" name="eventdatetimeend" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="eventlocation">Location</label>
+              <input type="text" id="eventlocation" name="eventlocation">
+            </div>
+            <div class="form-group">
+              <label for="eventregistrationdeadline">Registration Deadline</label>
+              <input type="datetime" id="eventregistrationdeadline" name="eventregistrationdeadline" required>
             </div>
           </div>
           <button type="submit" class="btn btn-primary">Add Event</button>
