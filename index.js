@@ -277,12 +277,37 @@ app.get("/participants", requireAuth, async (req, res) => {
   }
 });
 
-/*
-We need to change this to redirect to another ejs file
-*/
+// Add participant route
 app.post("/participants/add", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("participant").insert(req.body); // best practice: whitelist fields
+    let participantfirstname = req.body.firstname;
+    let participantlastname = req.body.lastname;
+    let participantemail = req.body.email;
+    let password = req.body.password;
+    let participantdob = req.body.dob;
+    let participantrole = req.body.role;
+    let participantphone = req.body.phone;
+    let participantcity = req.body.city;
+    let participantstate = req.body.state;
+    let participantzip = req.body.zip;
+    let participantschooloremployer = req.body.school_employer;
+    let participantfieldofinterest = req.body.field_of_interest;
+
+    let newParticipant = {
+      participantemail,
+      password,
+      participantfirstname,
+      participantlastname,
+      participantdob,
+      participantrole,
+      participantphone, 
+      participantcity,
+      participantstate,
+      participantzip, 
+      participantschooloremployer,
+      participantfieldofinterest
+    };
+    await knex("participant").insert(newParticipant);
     res.redirect("/participants");
   } catch (err) {
     res.status(500).send(err.message);
@@ -346,12 +371,16 @@ app.get("/events", requireAuth, async (req, res) => {
   }
 });
 
-/*
-We need to change this to redirect to another ejs file
-*/
+// Add event route
 app.post("/events/add", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("events").insert(req.body);
+    let eventname = req.body.event_name;
+    let eventdatetimestart = req.body.eventdatetimestart;
+    let eventdatetimeend = req.body.eventdatetimeend;
+    let eventlocation = req.body.eventlocation;
+    let eventregistrationdeadline = req.body.eventregistrationdeadline;
+    let newEvent = {eventname, eventdatetimestart, eventdatetimeend, eventlocation, eventregistrationdeadline};
+    await knex("events").insert(newEvent);
     res.redirect("/events");
   } catch (err) {
     res.status(500).send(err.message);
@@ -361,9 +390,9 @@ app.post("/events/add", requireAuth, requireAdmin, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/events/:id/edit", requireAuth, requireAdmin, async (req, res) => {
+app.post("/events/:eventid/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("events").where({ id: req.params.id }).update(req.body);
+    await knex("events").where({ "eventid": req.params.eventid }).update(req.body);
     res.redirect("/events");
   } catch (err) {
     res.status(500).send(err.message);

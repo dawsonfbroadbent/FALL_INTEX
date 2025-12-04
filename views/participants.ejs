@@ -38,17 +38,66 @@
         <form action="/participants/add" method="POST">
           <div class="form-row">
             <div class="form-group">
-              <label for="first_name">First Name</label>
-              <input type="text" id="first_name" name="first_name" required>
+              <label for="firstname">First Name</label>
+              <input type="text" id="firstname" name="firstname" required>
             </div>
             <div class="form-group">
-              <label for="last_name">Last Name</label>
-              <input type="text" id="last_name" name="last_name" required>
+              <label for="lastname">Last Name</label>
+              <input type="text" id="lastname" name="lastname" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="text" id="password" name="password" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dob">Date of Birth</label>
+              <input type="date" id="dob" name="dob">
+            </div>
+            <div class="form-group">
+              <label for="role">Role</label>
+              <input type="text" id="role" name="role" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" name="phone">
+            </div>
+            <div class="form-group">
+              <label for="city">City</label>
+              <input type="text" id="city" name="city">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="state">State</label>
+              <input type="text" id="state" name="state" maxlength="2" placeholder="e.g., CA">
+            </div>
+            <div class="form-group">
+              <label for="zip">Zip Code</label>
+              <input type="text" id="zip" name="zip" maxlength="10">
             </div>
           </div>
           <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email">
+            <label for="school_employer">School or Employer</label>
+            <input type="text" id="school_employer" name="school_employer">
+          </div>
+          <label>Field of Interest</label>
+          <div class="form-group">
+            <input type="radio" id="art" name="field_of_interest" value="Art" required>
+            <label for="art">Art</label>
+            <input type="radio" id="stem" name="field_of_interest" value="STEM" required>
+            <label for="stem">STEM</label>
+            <input type="radio" id="both" name="field_of_interest" value="Both" required>
+            <label for="both">Both</label>
           </div>
           <button type="submit" class="btn btn-primary">Add Participant</button>
         </form>
