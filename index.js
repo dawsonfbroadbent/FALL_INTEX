@@ -302,9 +302,9 @@ app.post("/participants/:id/edit", requireAuth, requireAdmin, async (req, res) =
 });
 
 // Delete participant route
-app.post("/participants/:id/delete", requireAuth, requireAdmin, async (req, res) => {
+app.post("/participants/:participantid/delete", requireAuth, requireManager, async (req, res) => {
   try {
-    await knex("participant").where({ id: req.params.id }).del();
+    await knex("participant").where({ "participantid": req.params.participantid }).del();
     res.redirect("/participants");
   } catch (err) {
     res.status(500).send(err.message);
@@ -324,9 +324,12 @@ app.get("/events", requireAuth, async (req, res) => {
     }
     const events = await query;
 
+    const eventtemplates = await knex("eventtemplate").select("eventname").orderBy("eventname")
+
     // Render events page with array of events and user level information
     res.render("events", {
       events,
+      eventtemplates,
       q,
       canEdit: isAdmin(req.session.level),
       error_message: "",
@@ -335,6 +338,7 @@ app.get("/events", requireAuth, async (req, res) => {
     // If error is caught, render events page with empty array of events and an error message
     res.render("events", {
       events: [],
+      eventtemplates,
       q,
       canEdit: isAdmin(req.session.level),
       error_message: err.message,
@@ -367,9 +371,9 @@ app.post("/events/:id/edit", requireAuth, requireAdmin, async (req, res) => {
 });
 
 // Delete event route
-app.post("/events/:id/delete", requireAuth, requireAdmin, async (req, res) => {
+app.post("/events/:eventid/delete", requireAuth, requireManager, async (req, res) => {
   try {
-    await knex("events").where({ id: req.params.id }).del();
+    await knex("eventoccurrence").where({ "eventid": req.params.eventid }).del();
     res.redirect("/events");
   } catch (err) {
     res.status(500).send(err.message);

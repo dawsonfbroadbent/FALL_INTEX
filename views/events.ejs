@@ -38,16 +38,31 @@
         <form action="/events/add" method="POST">
           <div class="form-group">
             <label for="event_name">Event Name</label>
-            <input type="text" id="event_name" name="event_name" required>
+            <select id="event_name" name="event_name" required>
+              <option value="">Select an event...</option>
+              <% eventTemplates.forEach(function(template) { %>
+                <option value="<%= template.eventname %>"><%= template.eventname %></option>
+              <% }); %>
+            </select>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="event_date">Event Date</label>
-              <input type="date" id="event_date" name="event_date" required>
+              <label for="eventdatetimestart">Start Date and Time</label>
+              <input type="datetime" id="eventdatetimestart" name="eventdatetimestart" required>
             </div>
             <div class="form-group">
-              <label for="location">Location</label>
-              <input type="text" id="location" name="location">
+              <label for="eventdatetimeend">End Date and Time</label>
+              <input type="datetime" id="eventdatetimeend" name="eventdatetimeend" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="eventlocation">Location</label>
+              <input type="text" id="eventlocation" name="eventlocation">
+            </div>
+            <div class="form-group">
+              <label for="eventregistrationdeadline">Registration Deadline</label>
+              <input type="datetime" id="eventregistrationdeadline" name="eventregistrationdeadline" required>
             </div>
           </div>
           <button type="submit" class="btn btn-primary">Add Event</button>
@@ -60,8 +75,10 @@
           <tr>
             <th>ID</th>
             <th>Event Name</th>
-            <th>Date</th>
+            <th>Start Date and Time</th>
+            <th>End Date and Time</th>
             <th>Location</th>
+            <th>Registration Deadline</th>
             <% if (canEdit) { %>
             <th>Actions</th>
             <% } %>
@@ -75,13 +92,36 @@
           <% } else { %>
           <% events.forEach(e => { %>
           <tr>
-            <td><%= e.id %></td>
-            <td><%= e.event_name %></td>
-            <td><%= e.event_date ? new Date(e.event_date).toLocaleDateString() : 'TBD' %></td>
-            <td><%= e.location || 'TBD' %></td>
+            <td><%= e.eventid %></td>
+            <td><%= e.eventname %></td>
+            <td><%= e.eventdatetimestart ? new Date(e.eventdatetimestart).toLocaleString('en-US', { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric', 
+              hour: 'numeric', 
+              minute: '2-digit',
+              hour12: true 
+            }) : 'TBD' %></td>
+            <td><%= e.eventdatetimeend ? new Date(e.eventdatetimeend).toLocaleString('en-US', { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric', 
+              hour: 'numeric', 
+              minute: '2-digit',
+              hour12: true 
+            }) : 'TBD' %></td>
+            <td><%= e.eventlocation || 'TBD' %></td>
+            <td><%= e.eventregistrationdeadline ? new Date(e.eventregistrationdeadline).toLocaleString('en-US', { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric', 
+              hour: 'numeric', 
+              minute: '2-digit',
+              hour12: true 
+            }) : 'TBD' %></td>
             <% if (canEdit) { %>
             <td class="action-buttons">
-              <form action="/events/<%= e.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this event?')">
+              <form action="/events/<%= e.eventid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this event?')">
                 <button type="submit" class="btn-delete">Delete</button>
               </form>
             </td>
