@@ -614,7 +614,7 @@ app.get("/milestones", requireAuth, async (req, res) => {
     if (participantid) query = query.where({"participantid": participantid});
     if (q) query = query.join("participant", 'milestones.participantid', 'participant.participantid')
     .where((b) => {
-      b.whereILike("participant.participantemail", `%${q}%`).orWhereILike("participant.participantfirstname", `%${q}%`)
+      b.whereILike("participant.participantfirstname", `%${q}%`)
       .orWhereILike("participant.participantlastname", `%${q}%`).orWhereILike("milestones.milestonetitle", `%${q}%`)});
     const all = await query;
 
