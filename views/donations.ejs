@@ -93,7 +93,7 @@
               <td><%= donation.date %></td>
               <% if (canEdit) { %>
               <td class="action-buttons">
-                <form action="/donations/<%= donation.participantid %>/<%= donation.donationnumber %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this donation?')">
+                <form action="/donations/<%= donation.id %>/<%= donation.number %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this donation?')">
                   <button type="submit" class="btn-delete">Delete</button>
                 </form>
               </td>
