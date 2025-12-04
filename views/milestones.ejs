@@ -38,8 +38,8 @@
         <form action="/milestones/add" method="POST">
           <div class="form-row">
             <div class="form-group">
-              <label for="participantid">Participant ID</label>
-              <input type="number" id="participantid" name="participantid" required value="<%= participantid || '' %>">
+              <label for="participant_email">Participant Email</label>
+              <input type="email" id="participant_email" name="participant_email" required>
             </div>
             <div class="form-group">
               <label for="milestonedate">Milestone Date</label>
@@ -47,8 +47,8 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="milestonetitle">Description</label>
-            <input type="text" id="milestonetitle" name="milestonetitle">
+            <label for="milestonetitle">Milestone Title</label>
+            <input type="text" id="milestonetitle" name="milestonetitle" required>
           </div>
           <button type="submit" class="btn btn-primary">Add Milestone</button>
         </form>
@@ -81,7 +81,7 @@
               <td><%= m.date ? new Date(m.date).toLocaleDateString() : 'N/A' %></td>
               <% if (canEdit) { %>
               <td class="action-buttons">
-                <form action="/milestones" method="POST" style="display: inline;" onsubmit="return confirm('Delete this milestone?')">
+                <form action="/milestones/<%= m.participantid %>/<%= m.milestonedate %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this milestone?')">
                   <button type="submit" class="btn-delete">Delete</button>
                 </form>
               </td>
