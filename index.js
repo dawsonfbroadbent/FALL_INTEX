@@ -288,6 +288,10 @@ app.get("/participants", requireAuth, async (req, res) => {
         this.where("participantfirstname", "ilike", `%${q}%`)
           .orWhere("participantlastname", "ilike", `%${q}%`)
           .orWhere("participantemail", "ilike", `%${q}%`)
+          .orWhere("participantcity", "ilike", `%${q}%`)
+          .orWhere("participantstate", "ilike", `%${q}%`)
+          .orWhere("participantschooloremployer", "ilike", `%${q}%`)
+          .orWhere("participantfieldofinterest", "ilike", `%${q}%`)
           .orWhere("participantrole", "ilike", `%${q}%`);
 
         // If they typed "admins" or "participants", also match the canonical role value
