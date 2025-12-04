@@ -80,14 +80,19 @@
             <label for="school_employer">School or Employer</label>
             <input type="text" id="school_employer" name="school_employer">
           </div>
-          <label>Field of Interest</label>
           <div class="form-group">
-            <input type="radio" id="art" name="field_of_interest" value="Art" required>
-            <label for="art">Art</label>
-            <input type="radio" id="stem" name="field_of_interest" value="STEM" required>
-            <label for="stem">STEM</label>
-            <input type="radio" id="both" name="field_of_interest" value="Both" required>
-            <label for="both">Both</label>
+            <label class="form-label">Field of Interest</label>
+          
+            <div class="interest-options" role="radiogroup" aria-label="Field of Interest">
+              <input type="radio" id="art" name="field_of_interest" value="Art" required>
+              <label for="art" class="interest-pill">Art</label>
+          
+              <input type="radio" id="stem" name="field_of_interest" value="STEM" required>
+              <label for="stem" class="interest-pill">STEM</label>
+          
+              <input type="radio" id="both" name="field_of_interest" value="Both" required>
+              <label for="both" class="interest-pill">Both</label>
+            </div>
           </div>
           <button type="submit" class="btn btn-primary">Add Participant</button>
         </form>
@@ -102,6 +107,10 @@
               <th>First Name</th>
               <th>Last Name</th>
               <th>Email</th>
+              <th>City</th>
+              <th>State</th>
+              <th>School/Employer</th>
+              <th>Field of Interest</th>
               <th>Role</th>
               <% if (canEdit) { %>
               <th>Actions</th>
@@ -119,6 +128,11 @@
               <td><%= p.participantfirstname %></td>
               <td><%= p.participantlastname %></td>
               <td><%= p.participantemail || 'N/A' %></td>
+              <td><%= p.participantcity %></td>
+              <td><%= p.participantstate %></td>
+              <td><%= p.participantschooloremployer %></td>
+              <td><%= p.participantfieldofinterest %></td>
+
               <td><%= p.participantrole %></td>
               <% if (canEdit) { %>
               <td class="action-buttons">

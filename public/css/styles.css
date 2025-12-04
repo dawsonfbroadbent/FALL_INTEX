@@ -12,7 +12,7 @@ body {
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1250px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -433,6 +433,61 @@ footer {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+}
+
+/* Field of Interest - segmented radio style */
+.form-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.interest-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.interest-options input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.interest-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #dcdcdc;
+  background: #ffffff;
+  color: #111;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.05s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.interest-pill:hover {
+  background: #f7f7f7;
+  border-color: #cfcfcf;
+}
+
+.interest-options input[type="radio"]:focus-visible + .interest-pill {
+  outline: 3px solid rgba(242, 198, 198, 0.6);
+  outline-offset: 2px;
+}
+
+.interest-options input[type="radio"]:checked + .interest-pill {
+  background: #F2C6C6;       /* your blush */
+  border-color: #e4b1b1;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.interest-options input[type="radio"]:checked + .interest-pill:active {
+  transform: scale(0.98);
 }
 
 .card {
@@ -1234,3 +1289,4 @@ tr:hover {
   cursor: pointer;
   font-weight: 700;
 }
+
