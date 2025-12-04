@@ -299,9 +299,9 @@ app.post("/participants/:id/edit", requireAuth, requireManager, async (req, res)
 });
 
 // Delete participant route
-app.post("/participants/:id/delete", requireAuth, requireManager, async (req, res) => {
+app.post("/participants/:participantid/delete", requireAuth, requireManager, async (req, res) => {
   try {
-    await knex("participant").where({ id: req.params.id }).del();
+    await knex("participant").where({ "participantid": req.params.participantid }).del();
     res.redirect("/participants");
   } catch (err) {
     res.status(500).send(err.message);
@@ -364,9 +364,9 @@ app.post("/events/:id/edit", requireAuth, requireManager, async (req, res) => {
 });
 
 // Delete event route
-app.post("/events/:id/delete", requireAuth, requireManager, async (req, res) => {
+app.post("/events/:eventid/delete", requireAuth, requireManager, async (req, res) => {
   try {
-    await knex("events").where({ id: req.params.id }).del();
+    await knex("eventoccurrence").where({ "eventid": req.params.eventid }).del();
     res.redirect("/events");
   } catch (err) {
     res.status(500).send(err.message);

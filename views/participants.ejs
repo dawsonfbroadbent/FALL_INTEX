@@ -79,8 +79,8 @@
             <td><%= p.participantemail || 'N/A' %></td>
             <% if (canEdit) { %>
             <td class="action-buttons">
-              <a href="/milestones?participant_id=<%= p.id %>" class="btn-edit">Milestones</a>
-              <form action="/participants/<%= p.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this participant?')">
+              <a href="/milestones?participantid=<%= p.participantid %>" class="btn-edit">Milestones</a>
+              <form action="/participants/<%= p.participantid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this participant?')">
                 <button type="submit" class="btn-delete">Delete</button>
               </form>
             </td>
