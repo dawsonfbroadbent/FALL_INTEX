@@ -321,9 +321,12 @@ app.get("/events", requireAuth, async (req, res) => {
     }
     const events = await query;
 
+    const eventtemplates = await knex("eventtemplate").select("eventname").orderBy("eventname")
+
     // Render events page with array of events and user level information
     res.render("events", {
       events,
+      eventtemplates,
       q,
       canEdit: isManager(req.session.level),
       error_message: "",
@@ -332,6 +335,7 @@ app.get("/events", requireAuth, async (req, res) => {
     // If error is caught, render events page with empty array of events and an error message
     res.render("events", {
       events: [],
+      eventtemplates,
       q,
       canEdit: isManager(req.session.level),
       error_message: err.message,
