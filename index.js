@@ -584,13 +584,13 @@ app.post("/surveys/:participantid/:eventid/delete", requireAuth, requireAdmin, a
 
 // Milestones (1-to-many with participants)
 app.get("/milestones", requireAuth, async (req, res) => {
-  const participantId = req.query.participantid;
+  const participantid = req.query.participantid;
   const q = (req.query.q || "").trim();
   try {
     // Get all milestones from database (search for individual's milestones if included in request)
     let query = knex("milestones").select("*").orderBy("milestonedate", "desc");
-    if (participantId) query = query
-    .join("participant", 'milestones.participantid', 'participant.participantid')
+    if (participantid) query = query.where({"participantid": participantid});
+    if (q) query = query.join("participant", 'milestones.participantid', 'participant.participantid')
     .where((b) => {
       b.whereILike("participant.participantemail", `%${q}%`).orWhereILike("participant.participantfirstname", `%${q}%`)
       .orWhereILike("participant.participantlastname", `%${q}%`).orWhereILike("milestones.milestonetitle", `%${q}%`)});
@@ -618,7 +618,7 @@ app.get("/milestones", requireAuth, async (req, res) => {
     // Render milestones page with array of milestones and user access level
     res.render("milestones", {
       milestones,
-      participantid: participantId || "",
+      participantid: participantid || "",
       canEdit: isAdmin(req.session.level),
       error_message: "",
     });
