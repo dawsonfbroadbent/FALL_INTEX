@@ -25,7 +25,7 @@ const knex = require("knex")({
 });
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 const host = "0.0.0.0";
 
 // ---- Express / EJS setup ----
@@ -57,7 +57,7 @@ function isManager(level) {
   // Accept a few common representations:
   // "manager", "Manager", 1, "1", "M"
   if (level === undefined || level === null) return false;
-  return String(level).trim() === "M";
+  return String(level).trim() === "admin";
 }
 
 function requireAuth(req, res, next) {
@@ -88,14 +88,18 @@ app.get("/login", (req, res) => {
 
 // Login route that evalues input username and password against credentials stored in database
 app.post("/login", async (req, res) => {
-  const username = req.body.username.trim();
-  const password = req.body.password.trim();
+  const participantemail = (req.body.email ?? "").trim().toLowerCase();
+  const password = (req.body.password ?? "").trim();
+
+  if (!participantemail || !password) {
+    return res.status(400).render("login", { error_message: "Invalid login" });
+  }
 
   try {
     // Search for the user in the database by username, and check to make sure a user was returned
-    const user = await knex("users")
-      .select("id", "username", "password", "level")
-      .where({ username })
+    const user = await knex("participant")
+      .select("participantid", "participantemail", "password", "participantrole")
+      .where({ participantemail })
       .first();
 
     if (!user) {
@@ -110,9 +114,9 @@ app.post("/login", async (req, res) => {
 
     // Set session variables according to user information
     req.session.isLoggedIn = true;
-    req.session.userId = user.id;
-    req.session.username = user.username;
-    req.session.level = user.level;
+    req.session.userId = user.participantid;
+    req.session.username = user.participantemail;
+    req.session.level = user.participantrole;
 
     // Go to landing page, now logged in
     return res.redirect("/");
