@@ -453,7 +453,24 @@ app.get("/milestones", requireAuth, async (req, res) => {
     .where((b) => {
       b.whereILike("participant.participantemail", `%${q}%`).orWhereILike("participant.participantfirstname", `%${q}%`)
       .orWhereILike("participant.participantlastname", `%${q}%`).orWhereILike("milestones.milestonetitle", `%${q}%`)});
-    const milestones = await query;
+    const all = await query;
+
+    for (let iCount = 0; iCount < all.length; iCount++) {
+      let donationDate = all[iCount].milestonedate;
+      let formattedDate = new Date(donationDate).toLocaleDateString("en-US", {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+      let milestoneTitle = all[iCount].milestonetitle
+      let donor = await knex("participant").select("participantfirstname", "participantlastname").where({"participantid": all[iCount].participantid}).first();
+      let donorFullName = donor.participantfirstname + " " + donor.participantlastname;
+      donations.push({
+        date: formattedDate,
+        title: milestoneTitle,
+        participant: donorFullName
+      });
+    };
 
     // Render milestones page with array of milestones and user access level
     res.render("milestones", {

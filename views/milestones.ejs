@@ -38,17 +38,17 @@
         <form action="/milestones/add" method="POST">
           <div class="form-row">
             <div class="form-group">
-              <label for="participant_id">Participant ID</label>
-              <input type="number" id="participant_id" name="participant_id" required value="<%= participant_id || '' %>">
+              <label for="participantid">Participant ID</label>
+              <input type="number" id="participantid" name="participantid" required value="<%= participantid || '' %>">
             </div>
             <div class="form-group">
-              <label for="milestone_date">Milestone Date</label>
-              <input type="date" id="milestone_date" name="milestone_date" required>
+              <label for="milestonedate">Milestone Date</label>
+              <input type="date" id="milestonedate" name="milestonedate" required>
             </div>
           </div>
           <div class="form-group">
-            <label for="description">Description</label>
-            <input type="text" id="description" name="description">
+            <label for="milestonetitle">Description</label>
+            <input type="text" id="milestonetitle" name="milestonetitle">
           </div>
           <button type="submit" class="btn btn-primary">Add Milestone</button>
         </form>
@@ -58,10 +58,9 @@
       <table>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Participant ID</th>
+            <th>Participant Name</th>
+            <th>Milestone Title</th>
             <th>Date</th>
-            <th>Description</th>
             <% if (canEdit) { %>
             <th>Actions</th>
             <% } %>
@@ -75,10 +74,9 @@
           <% } else { %>
           <% milestones.forEach(m => { %>
           <tr>
-            <td><%= m.id %></td>
-            <td><%= m.participant_id %></td>
-            <td><%= m.milestone_date ? new Date(m.milestone_date).toLocaleDateString() : 'N/A' %></td>
-            <td><%= m.description || 'N/A' %></td>
+            <td><%= m.participant %></td>
+            <td><%= m.title || 'N/A' %></td>
+            <td><%= m.date ? new Date(m.date).toLocaleDateString() : 'N/A' %></td>
             <% if (canEdit) { %>
             <td class="action-buttons">
               <form action="/milestones/<%= m.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this milestone?')">
