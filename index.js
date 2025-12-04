@@ -1,5 +1,5 @@
 // Dawson Broadbent, Ashlynn Burgess, Markus Walker
-// index.js - Express routing + auth (Manager vs Common) + EJS + Knex (PostgreSQL)
+// index.js - Express routing + auth (Admin vs Participant) + EJS + Knex (PostgreSQL)
 
 require("dotenv").config();
 
@@ -25,7 +25,7 @@ const knex = require("knex")({
 });
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 const host = "0.0.0.0";
 
 // ---- Express / EJS setup ----
@@ -53,11 +53,10 @@ app.use((req, res, next) => {
 });
 
 // ---- Helpers ----
-function isManager(level) {
-  // Accept a few common representations:
-  // "manager", "Manager", 1, "1", "M"
+function isAdmin(level) {
+  // Accepts admin
   if (level === undefined || level === null) return false;
-  return String(level).trim() === "M";
+  return String(level).trim().toLowerCase() === "admin";
 }
 
 function requireAuth(req, res, next) {
@@ -65,9 +64,9 @@ function requireAuth(req, res, next) {
   return res.redirect("/login");
 }
 
-function requireManager(req, res, next) {
-  if (req.session?.isLoggedIn && isManager(req.session.level)) return next();
-  return res.status(403).send("Forbidden: Manager access only.");
+function requireAdmin(req, res, next) {
+  if (req.session?.isLoggedIn && isAdmin(req.session.level)) return next();
+  return res.status(403).send("Forbidden: Admin access only.");
 }
 
 // Root route that directs the user to the index.ejs page
@@ -88,14 +87,18 @@ app.get("/login", (req, res) => {
 
 // Login route that evalues input username and password against credentials stored in database
 app.post("/login", async (req, res) => {
-  const username = req.body.username.trim();
-  const password = req.body.password.trim();
+  const participantemail = (req.body.email ?? "").trim().toLowerCase();
+  const password = (req.body.password ?? "").trim();
+
+  if (!participantemail || !password) {
+    return res.status(400).render("login", { error_message: "Invalid login" });
+  }
 
   try {
     // Search for the user in the database by username, and check to make sure a user was returned
-    const user = await knex("users")
-      .select("id", "username", "password", "level")
-      .where({ username })
+    const user = await knex("participant")
+      .select("participantid", "participantemail", "password", "participantrole")
+      .where({ participantemail })
       .first();
 
     if (!user) {
@@ -110,9 +113,9 @@ app.post("/login", async (req, res) => {
 
     // Set session variables according to user information
     req.session.isLoggedIn = true;
-    req.session.userId = user.id;
-    req.session.username = user.username;
-    req.session.level = user.level;
+    req.session.userId = user.participantid;
+    req.session.username = user.participantemail;
+    req.session.level = user.participantrole;
 
     // Go to landing page, now logged in
     return res.redirect("/");
@@ -142,7 +145,7 @@ app.get("/donations", async (req, res) => {
     // Create donations array and fill with donation info from database if user is logged in
     let donations = [];
     let all = [];
-    if (req.session.isLoggedIn) {
+    if (req.session?.isLoggedIn) {
       all = await knex("donations").orderBy("participantid");
     }
 
@@ -173,7 +176,7 @@ app.get("/donations", async (req, res) => {
     res.render("donations", {
       donations,
       isPublic: !req.session?.isLoggedIn,
-      canEdit: req.session?.isLoggedIn && isManager(req.session.level),
+      canEdit: req.session?.isLoggedIn && isAdmin(req.session.level),
       error_message: "",
     });
   } catch (err) {
@@ -181,7 +184,7 @@ app.get("/donations", async (req, res) => {
     res.render("donations", {
       donations: [],
       isPublic: !req.session?.isLoggedIn,
-      canEdit: req.session?.isLoggedIn && isManager(req.session.level),
+      canEdit: req.session?.isLoggedIn && isAdmin(req.session.level),
       error_message: err.message,
     });
   }
@@ -228,8 +231,8 @@ app.post("/donations/public", async (req, res) => {
   }
 });
 
-// Manager-only donation maintenance (example delete)
-app.post("/donations/:id/delete", requireAuth, requireManager, async (req, res) => {
+// Admin-only donation maintenance (example delete)
+app.post("/donations/:id/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
     // Delete donation record with associated ID from database and redirect to donations route
     await knex("donations").where({ id: req.params.id }).del();
@@ -260,7 +263,7 @@ app.get("/participants", requireAuth, async (req, res) => {
     res.render("participants", {
       participants,
       q,
-      canEdit: isManager(req.session.level),
+      canEdit: isAdmin(req.session.level),
       error_message: "",
     });
   } catch (err) {
@@ -268,7 +271,7 @@ app.get("/participants", requireAuth, async (req, res) => {
     res.render("participants", {
       participants: [],
       q,
-      canEdit: isManager(req.session.level),
+      canEdit: isAdmin(req.session.level),
       error_message: err.message,
     });
   }
@@ -277,7 +280,7 @@ app.get("/participants", requireAuth, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/participants/add", requireAuth, requireManager, async (req, res) => {
+app.post("/participants/add", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("participant").insert(req.body); // best practice: whitelist fields
     res.redirect("/participants");
@@ -289,7 +292,7 @@ app.post("/participants/add", requireAuth, requireManager, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/participants/:id/edit", requireAuth, requireManager, async (req, res) => {
+app.post("/participants/:id/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("participant").where({ id: req.params.id }).update(req.body);
     res.redirect("/participants");
@@ -328,7 +331,7 @@ app.get("/events", requireAuth, async (req, res) => {
       events,
       eventtemplates,
       q,
-      canEdit: isManager(req.session.level),
+      canEdit: isAdmin(req.session.level),
       error_message: "",
     });
   } catch (err) {
@@ -337,7 +340,7 @@ app.get("/events", requireAuth, async (req, res) => {
       events: [],
       eventtemplates,
       q,
-      canEdit: isManager(req.session.level),
+      canEdit: isAdmin(req.session.level),
       error_message: err.message,
     });
   }
@@ -346,7 +349,7 @@ app.get("/events", requireAuth, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/events/add", requireAuth, requireManager, async (req, res) => {
+app.post("/events/add", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("events").insert(req.body);
     res.redirect("/events");
@@ -358,7 +361,7 @@ app.post("/events/add", requireAuth, requireManager, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/events/:id/edit", requireAuth, requireManager, async (req, res) => {
+app.post("/events/:id/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("events").where({ id: req.params.id }).update(req.body);
     res.redirect("/events");
@@ -412,7 +415,7 @@ app.get("/surveys", requireAuth, async (req, res) => {
     res.render("surveys", {
       surveys,
       q,
-      canEdit: isManager(req.session.level),
+      canEdit: isAdmin(req.session.level),
       error_message: "",
     });
   } catch (err) {
@@ -420,7 +423,7 @@ app.get("/surveys", requireAuth, async (req, res) => {
     res.render("surveys", {
       surveys: [],
       q,
-      canEdit: isManager(req.session.level),
+      canEdit: isAdmin(req.session.level),
       error_message: err.message,
     });
   }
@@ -429,7 +432,7 @@ app.get("/surveys", requireAuth, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/surveys/add", requireAuth, requireManager, async (req, res) => {
+app.post("/surveys/add", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("surveyresponse").insert(req.body);
     res.redirect("/surveys");
@@ -441,7 +444,7 @@ app.post("/surveys/add", requireAuth, requireManager, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/surveys/:id/edit", requireAuth, requireManager, async (req, res) => {
+app.post("/surveys/:id/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("surveyresponse").where({ id: req.params.id }).update(req.body);
     res.redirect("/surveys");
@@ -451,7 +454,7 @@ app.post("/surveys/:id/edit", requireAuth, requireManager, async (req, res) => {
 });
 
 // Delete survey response route
-app.post("/surveys/:id/delete", requireAuth, requireManager, async (req, res) => {
+app.post("/surveys/:id/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("surveyresponse").where({ id: req.params.id }).del();
     res.redirect("/surveys");
@@ -496,7 +499,7 @@ app.get("/milestones", requireAuth, async (req, res) => {
     res.render("milestones", {
       milestones,
       participantid: participantId || "",
-      canEdit: isManager(req.session.level),
+      canEdit: isAdmin(req.session.level),
       error_message: "",
     });
   } catch (err) {
@@ -504,7 +507,7 @@ app.get("/milestones", requireAuth, async (req, res) => {
     res.render("milestones", {
       milestones: [],
       participantid: participantId || "",
-      canEdit: isManager(req.session.level),
+      canEdit: isAdmin(req.session.level),
       error_message: err.message,
     });
   }
@@ -513,7 +516,7 @@ app.get("/milestones", requireAuth, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/milestones/add", requireAuth, requireManager, async (req, res) => {
+app.post("/milestones/add", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("milestones").insert(req.body);
     res.redirect("/milestones");
@@ -525,7 +528,7 @@ app.post("/milestones/add", requireAuth, requireManager, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/milestones/:id/edit", requireAuth, requireManager, async (req, res) => {
+app.post("/milestones/:id/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("milestones").where({ id: req.params.id }).update(req.body);
     res.redirect("/milestones");
@@ -535,7 +538,7 @@ app.post("/milestones/:id/edit", requireAuth, requireManager, async (req, res) =
 });
 
 // Delete milestone route
-app.post("/milestones/:id/delete", requireAuth, requireManager, async (req, res) => {
+app.post("/milestones/:id/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("milestones").where({ id: req.params.id }).del();
     res.redirect("/milestones");
@@ -545,7 +548,7 @@ app.post("/milestones/:id/delete", requireAuth, requireManager, async (req, res)
 });
 
 // Users page route
-app.get("/users", requireAuth, requireManager, async (req, res) => {
+app.get("/users", requireAuth, requireAdmin, async (req, res) => {
   const q = (req.query.q || "").trim();
   try {
     // Get array of users from database (search by username if included in request)
@@ -566,7 +569,7 @@ app.get("/users", requireAuth, requireManager, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/users/add", requireAuth, requireManager, async (req, res) => {
+app.post("/users/add", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("users").insert(req.body); // best practice: whitelist fields
     res.redirect("/users");
@@ -578,7 +581,7 @@ app.post("/users/add", requireAuth, requireManager, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/users/:id/edit", requireAuth, requireManager, async (req, res) => {
+app.post("/users/:id/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("users").where({ id: req.params.id }).update(req.body);
     res.redirect("/users");
@@ -588,7 +591,7 @@ app.post("/users/:id/edit", requireAuth, requireManager, async (req, res) => {
 });
 
 // Delete user route
-app.post("/users/:id/delete", requireAuth, requireManager, async (req, res) => {
+app.post("/users/:id/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("users").where({ id: req.params.id }).del();
     res.redirect("/users");
