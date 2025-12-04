@@ -40,7 +40,7 @@
             <label for="event_name">Event Name</label>
             <select id="event_name" name="event_name" required>
               <option value="">Select an event...</option>
-              <% eventTemplates.forEach(function(template) { %>
+              <% eventtemplates.forEach(function(template) { %>
                 <option value="<%= template.eventname %>"><%= template.eventname %></option>
               <% }); %>
             </select>
