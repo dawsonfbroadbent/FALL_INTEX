@@ -673,25 +673,58 @@ app.post("/milestones/add", requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
-/*
-We need to change this to redirect to another ejs file
-*/
-app.post("/milestones/:id/edit", requireAuth, requireAdmin, async (req, res) => {
+// Edit Milestone Route
+app.post("/milestones/:participantid/:oldtitle/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("milestones").where({ id: req.params.id }).update(req.body);
+    const participantid = req.params.participantid;
+    const oldtitle = decodeURIComponent(req.params.oldtitle);
+    const { milestonedate, milestonetitle } = req.body;
+
+    console.log('Edit params:', { participantid, oldtitle, milestonedate, milestonetitle });
+
+    await knex.transaction(async (trx) => {
+      // Delete old record using the PK (participantid + old title)
+      const deleted = await trx("milestones")
+        .where({ 
+          participantid: participantid,
+          milestonetitle: oldtitle 
+        })
+        .delete();
+
+      console.log('Rows deleted:', deleted);
+
+      // Insert new record with updated values
+      await trx("milestones").insert({
+        participantid: participantid,
+        milestonedate: milestonedate,
+        milestonetitle: milestonetitle,
+      });
+    });
+
     res.redirect("/milestones");
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error("Edit milestone error:", err);
+    res.redirect("/milestones?error=Edit%20failed");
   }
 });
 
-// Delete milestone route
-app.post("/milestones/:participantid/:milestonedate/delete", requireAuth, requireAdmin, async (req, res) => {
+// Delete Milestone Route (also needs updating)
+app.post("/milestones/:participantid/:title/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("milestones").where({ "participantid": req.params.participantid }).andWhere({ "milestonedate": req.params.milestonedate }).del();
+    const participantid = req.params.participantid;
+    const title = decodeURIComponent(req.params.title);
+
+    await knex("milestones")
+      .where({ 
+        participantid: participantid,
+        milestonetitle: title 
+      })
+      .delete();
+
     res.redirect("/milestones");
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error("Delete milestone error:", err);
+    res.redirect("/milestones?error=Delete%20failed");
   }
 });
 
