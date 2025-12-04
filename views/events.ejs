@@ -70,67 +70,68 @@
       </div>
       <% } %>
 
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Event Name</th>
-            <th>Start Date and Time</th>
-            <th>End Date and Time</th>
-            <th>Location</th>
-            <th>Registration Deadline</th>
-            <% if (canEdit) { %>
-            <th>Actions</th>
+      <!-- ✅ Scrollable table container (sticky header) -->
+      <div class="table-scroll" role="region" aria-label="Events table" tabindex="0">
+        <table class="sticky-table">
+          <thead>
+            <tr>
+              <th>Event Name</th>
+              <th>Start Date and Time</th>
+              <th>End Date and Time</th>
+              <th>Location</th>
+              <th>Registration Deadline</th>
+              <% if (canEdit) { %>
+              <th>Actions</th>
+              <% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (events.length === 0) { %>
+            <tr>
+              <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No events found.</td>
+            </tr>
+            <% } else { %>
+            <% events.forEach(e => { %>
+            <tr>
+              <td><%= e.eventname %></td>
+              <td><%= e.eventdatetimestart ? new Date(e.eventdatetimestart).toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+              }) : 'TBD' %></td>
+              <td><%= e.eventdatetimeend ? new Date(e.eventdatetimeend).toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+              }) : 'TBD' %></td>
+              <td><%= e.eventlocation || 'TBD' %></td>
+              <td><%= e.eventregistrationdeadline ? new Date(e.eventregistrationdeadline).toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+              }) : 'TBD' %></td>
+              <% if (canEdit) { %>
+              <td class="action-buttons">
+                <form action="/events/<%= e.eventid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this event?')">
+                  <button type="submit" class="btn-delete">Delete</button>
+                </form>
+              </td>
+              <% } %>
+            </tr>
+            <% }) %>
             <% } %>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (events.length === 0) { %>
-          <tr>
-            <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No events found.</td>
-          </tr>
-          <% } else { %>
-          <% events.forEach(e => { %>
-          <tr>
-            <td><%= e.eventid %></td>
-            <td><%= e.eventname %></td>
-            <td><%= e.eventdatetimestart ? new Date(e.eventdatetimestart).toLocaleString('en-US', { 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric', 
-              hour: 'numeric', 
-              minute: '2-digit',
-              hour12: true 
-            }) : 'TBD' %></td>
-            <td><%= e.eventdatetimeend ? new Date(e.eventdatetimeend).toLocaleString('en-US', { 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric', 
-              hour: 'numeric', 
-              minute: '2-digit',
-              hour12: true 
-            }) : 'TBD' %></td>
-            <td><%= e.eventlocation || 'TBD' %></td>
-            <td><%= e.eventregistrationdeadline ? new Date(e.eventregistrationdeadline).toLocaleString('en-US', { 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric', 
-              hour: 'numeric', 
-              minute: '2-digit',
-              hour12: true 
-            }) : 'TBD' %></td>
-            <% if (canEdit) { %>
-            <td class="action-buttons">
-              <form action="/events/<%= e.eventid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this event?')">
-                <button type="submit" class="btn-delete">Delete</button>
-              </form>
-            </td>
-            <% } %>
-          </tr>
-          <% }) %>
-          <% } %>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 

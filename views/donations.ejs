@@ -63,47 +63,54 @@
       </div>
       <% } else { %>
       
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-        <h2>Donation Records</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+        <form action="/donations" method="GET" class="search-box" style="margin-bottom: 0;">
+          <input type="text" name="q" placeholder="Search donations..." value="<%= q || '' %>">
+          <button type="submit" class="btn btn-secondary">Search</button>
+        </form>
         <% if (canEdit) { %>
         <a href="/donations" class="btn btn-primary">Add Donation</a>
         <% } %>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Donor Name</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <% if (canEdit) { %>
-            <th>Actions</th>
+      <!-- ✅ Scrollable table container (sticky header) -->
+      <div class="table-scroll" role="region" aria-label="Donation records table" tabindex="0">
+        <table class="sticky-table">
+          <thead>
+            <tr>
+              <th>Donor Name</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <% if (canEdit) { %>
+              <th>Actions</th>
+              <% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (donations.length === 0) { %>
+            <tr>
+              <td colspan="<%= canEdit ? 4 : 3 %>" style="text-align: center; color: #666;">No donations found.</td>
+            </tr>
+            <% } else { %>
+            <% donations.forEach(donation => { %>
+            <tr>
+              <td><%= donation.donor %></td>
+              <td>$<%= donation.amount %></td>
+              <td><%= donation.date %></td>
+              <% if (canEdit) { %>
+              <td class="action-buttons">
+                <form action="/donations/<%= donation.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this donation?')">
+                  <button type="submit" class="btn-delete">Delete</button>
+                </form>
+              </td>
+              <% } %>
+            </tr>
+            <% }) %>
             <% } %>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (donations.length === 0) { %>
-          <tr>
-            <td colspan="<%= canEdit ? 6 : 5 %>" style="text-align: center; color: #666;">No donations yet.</td>
-          </tr>
-          <% } else { %>
-          <% donations.forEach(donation => { %>
-          <tr>
-            <td><%= donation.donor %></td>
-            <td>$<%= donation.amount %></td>
-            <td><%= donation.date %></td>
-            <% if (canEdit) { %>
-            <td class="action-buttons">
-              <form action="/donations/<%= donation.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this donation?')">
-                <button type="submit" class="btn-delete">Delete</button>
-              </form>
-            </td>
-            <% } %>
-          </tr>
-          <% }) %>
-          <% } %>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
+
       <% } %>
     </div>
   </section>

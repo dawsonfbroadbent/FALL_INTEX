@@ -142,6 +142,9 @@ app.get("/about", (req, res) => {
 // ---- Public Donations Page (accessible to ANY visitor) ----
 app.get("/donations", async (req, res) => {
   try {
+    // Get search query from URL parameters
+    const searchQuery = req.query.q || "";
+
     // Create donations array and fill with donation info from database if user is logged in
     let donations = [];
     let all = [];
@@ -165,12 +168,26 @@ app.get("/donations", async (req, res) => {
       let donationAmount = all[iCount].donationamount;
       let donor = await knex("participant").select("participantfirstname", "participantlastname").where({"participantid": all[iCount].participantid}).first();
       let donorFullName = donor.participantfirstname + " " + donor.participantlastname;
+      
       donations.push({
         date: formattedDate,
         amount: donationAmount,
-        donor: donorFullName
+        donor: donorFullName,
+        id: all[iCount].donationid
       });
     };
+
+    // Filter donations based on search query
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      donations = donations.filter(donation => {
+        return (
+          donation.donor.toLowerCase().includes(lowerQuery) ||
+          donation.amount.toString().includes(lowerQuery) ||
+          donation.date.includes(searchQuery)
+        );
+      });
+    }
 
     // Render donations page with permissions based on user logged in status and level
     res.render("donations", {
@@ -178,6 +195,7 @@ app.get("/donations", async (req, res) => {
       isPublic: !req.session?.isLoggedIn,
       canEdit: req.session?.isLoggedIn && isAdmin(req.session.level),
       error_message: "",
+      q: searchQuery
     });
   } catch (err) {
     // If error is caught, render donations page with error message
@@ -186,6 +204,7 @@ app.get("/donations", async (req, res) => {
       isPublic: !req.session?.isLoggedIn,
       canEdit: req.session?.isLoggedIn && isAdmin(req.session.level),
       error_message: err.message,
+      q: req.query.q || ""
     });
   }
 });

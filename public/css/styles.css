@@ -1063,6 +1063,25 @@ tr:hover {
   font-size: 0.92rem;
 }
 
+/* Scrollable table container with sticky headers */
+.table-scroll {
+  max-height: 520px;       /* adjust if you want taller/shorter */
+  overflow: auto;
+  border-radius: 12px;     /* matches modern card shapes */
+}
+
+/* Keep table layout unchanged */
+.table-scroll table {
+  width: 100%;
+}
+
+/* Sticky header */
+.table-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;              /* ensures header stays above body cells */
+}
+
 .score-legend .legend-title {
   font-weight: 600;
   color: rgba(0,0,0,0.75);
