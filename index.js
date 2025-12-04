@@ -175,7 +175,8 @@ app.get("/donations", async (req, res) => {
         date: formattedDate,
         amount: donationAmount,
         donor: donorFullName,
-        id: all[iCount].donationid
+        id: all[iCount].participantid,
+        number: all[iCount].donationnumber
       });
     };
 
@@ -598,7 +599,8 @@ app.get("/milestones", requireAuth, async (req, res) => {
       milestones.push({
         date: formattedDate,
         title: milestoneTitle,
-        participant: donorFullName
+        participant: donorFullName,
+        participantid: all[iCount].participantid
       });
     };
 

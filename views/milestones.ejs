@@ -81,7 +81,7 @@
               <td><%= m.date ? new Date(m.date).toLocaleDateString() : 'N/A' %></td>
               <% if (canEdit) { %>
               <td class="action-buttons">
-                <form action="/milestones/<%= m.participantid %>/<%= m.milestonedate %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this milestone?')">
+                <form action="/milestones/<%= m.participantid %>/<%= m.date %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this milestone?')">
                   <button type="submit" class="btn-delete">Delete</button>
                 </form>
               </td>
