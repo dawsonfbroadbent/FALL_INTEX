@@ -234,9 +234,6 @@
 
       backdrop.style.display = 'flex';
       document.body.style.overflow = 'hidden';
-
-      console.log("dataset:", button.dataset);
-      console.log("computed action:", `/events/${button.dataset.eventid}/edit`);
     }
 
     function closeEditModal() {
@@ -259,8 +256,6 @@
 
     document.getElementById("editEventForm")?.addEventListener("submit", (e) => {
       const fd = new FormData(e.target);
-      console.log("Submitting to:", e.target.action);
-      console.log("Payload:", Object.fromEntries(fd.entries()));
     });
   </script>
 
