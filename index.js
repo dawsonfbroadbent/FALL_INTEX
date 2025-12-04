@@ -268,24 +268,36 @@ app.post("/donations/:participantid/:donationnumber/delete", requireAuth, requir
   }
 });
 
-// Participants page route
 app.get("/participants", requireAuth, async (req, res) => {
   const q = (req.query.q || "").trim();
-  try {
-    let query = knex("participant").select("*").orderBy("participantid", "asc");
 
-    // Search for participant if included in the request
+  try {
+    const query = knex("participant")
+      .select("*")
+      .orderBy("participantid", "asc");
+
     if (q) {
-      query = query.where((b) => {
-        b.whereILike("participantfirstname", `%${q}%`)
-          .orWhereILike("participantlastname", `%${q}%`)
-          .orWhereILike("participantemail", `%${q}%`);
+      const qLower = q.toLowerCase();
+      const roleAlias =
+        ["admins", "admin"].includes(qLower) ? "admin" :
+        ["participants", "participant"].includes(qLower) ? "participant" :
+        null;
+
+      query.where(function () {
+        this.where("participantfirstname", "ilike", `%${q}%`)
+          .orWhere("participantlastname", "ilike", `%${q}%`)
+          .orWhere("participantemail", "ilike", `%${q}%`)
+          .orWhere("participantrole", "ilike", `%${q}%`);
+
+        // If they typed "admins" or "participants", also match the canonical role value
+        if (roleAlias) {
+          this.orWhere("participantrole", roleAlias);
+        }
       });
     }
 
     const participants = await query;
 
-    // Render participants page with particpants information from database and access level information
     res.render("participants", {
       participants,
       q,
@@ -293,7 +305,6 @@ app.get("/participants", requireAuth, async (req, res) => {
       error_message: "",
     });
   } catch (err) {
-    // Render participants page with empty array and error message if error is caught
     res.render("participants", {
       participants: [],
       q,
@@ -311,7 +322,7 @@ app.post("/participants/add", requireAuth, requireAdmin, async (req, res) => {
     let participantemail = req.body.email;
     let password = req.body.password;
     let participantdob = req.body.dob;
-    let participantrole = req.body.role;
+    let participantrole = "participant";
     let participantphone = req.body.phone;
     let participantcity = req.body.city;
     let participantstate = req.body.state;
