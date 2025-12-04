@@ -60,72 +60,75 @@
           <span class="legend-item"><span class="legend-badge">NPS</span> Net Promoter Score</span>
         <% } %>
       </div>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Participant</th>
-            <th>Event Name</th>
-            <th>S</th>
-            <th>U</th>
-            <th>I</th>
-            <th>R</th>
-            <th>O</th>
-            <% if (canEdit) { %>
-            <th>NPS</th>
-            <% } %>
-            <th>Comments</th>
-            <th>Survey Date</th>
-            <% if (canEdit) { %>
-            <th>Actions</th>
-            <% } %>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (surveys.length === 0) { %>
-          <tr>
-            <td colspan="<%= canEdit ? 10 : 9 %>" style="text-align: center; color: #666;">No surveys found.</td>
-          </tr>
-          <% } else { %>
-          <% surveys.forEach((s, index) => { %>
-          <tr>
-            <td><%= s.participantname %></td>
-            <td><%= s.eventname %></td>
-            <td><%= s.surveysatisfactionscore %></td>
-            <td><%= s.surveyusefulnessscore %></td>
-            <td><%= s.surveyinstructorscore %></td>
-            <td><%= s.surveyrecommendationscore %></td>
-            <td><%= (s.surveysatisfactionscore + s.surveyusefulnessscore + s.surveyinstructorscore + s.surveyrecommendationscore) / 4 %></td>
-            <% if (canEdit) { %>
-            <td><%= s.surveynpsbucket %></td>
-            <% } %>
-            <td class="comments-cell">
-              <% if (s.surveycomments && s.surveycomments.length > 100) { %>
-                <div class="comment-text truncated" id="comment-<%= index %>">
-                  <%= s.surveycomments %>
-                </div>
-                <button class="comment-toggle" onclick="toggleComment(<%= index %>)">
-                  Read more
-                </button>
-              <% } else { %>
-                <div class="comment-text">
-                  <%= s.surveycomments || 'N/A' %>
-                </div>
+
+      <!-- ✅ Scrollable table container (sticky header) -->
+      <div class="table-scroll" role="region" aria-label="Surveys table" tabindex="0">
+        <table class="sticky-table">
+          <thead>
+            <tr>
+              <th>Participant</th>
+              <th>Event Name</th>
+              <th>S</th>
+              <th>U</th>
+              <th>I</th>
+              <th>R</th>
+              <th>O</th>
+              <% if (canEdit) { %>
+              <th>NPS</th>
               <% } %>
-            </td>
-            <td><%= s.surveysubmissiondate ? new Date(s.surveysubmissiondate).toLocaleDateString() : 'N/A' %></td>
-            <% if (canEdit) { %>
-            <td class="action-buttons">
-              <form action="/surveys/<%= s.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this survey?')">
-                <button type="submit" class="btn-delete">Delete</button>
-              </form>
-            </td>
+              <th>Comments</th>
+              <th>Survey Date</th>
+              <% if (canEdit) { %>
+              <th>Actions</th>
+              <% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (surveys.length === 0) { %>
+            <tr>
+              <td colspan="<%= canEdit ? 10 : 9 %>" style="text-align: center; color: #666;">No surveys found.</td>
+            </tr>
+            <% } else { %>
+            <% surveys.forEach((s, index) => { %>
+            <tr>
+              <td><%= s.participantname %></td>
+              <td><%= s.eventname %></td>
+              <td><%= s.surveysatisfactionscore %></td>
+              <td><%= s.surveyusefulnessscore %></td>
+              <td><%= s.surveyinstructorscore %></td>
+              <td><%= s.surveyrecommendationscore %></td>
+              <td><%= (s.surveysatisfactionscore + s.surveyusefulnessscore + s.surveyinstructorscore + s.surveyrecommendationscore) / 4 %></td>
+              <% if (canEdit) { %>
+              <td><%= s.surveynpsbucket %></td>
+              <% } %>
+              <td class="comments-cell">
+                <% if (s.surveycomments && s.surveycomments.length > 100) { %>
+                  <div class="comment-text truncated" id="comment-<%= index %>">
+                    <%= s.surveycomments %>
+                  </div>
+                  <button class="comment-toggle" onclick="toggleComment(<%= index %>)">
+                    Read more
+                  </button>
+                <% } else { %>
+                  <div class="comment-text">
+                    <%= s.surveycomments || 'N/A' %>
+                  </div>
+                <% } %>
+              </td>
+              <td><%= s.surveysubmissiondate ? new Date(s.surveysubmissiondate).toLocaleDateString() : 'N/A' %></td>
+              <% if (canEdit) { %>
+              <td class="action-buttons">
+                <form action="/surveys/<%= s.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this survey?')">
+                  <button type="submit" class="btn-delete">Delete</button>
+                </form>
+              </td>
+              <% } %>
+            </tr>
+            <% }) %>
             <% } %>
-          </tr>
-          <% }) %>
-          <% } %>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -135,7 +138,7 @@
     function toggleComment(index) {
       const commentDiv = document.getElementById('comment-' + index);
       const button = commentDiv.nextElementSibling;
-      
+
       if (commentDiv.classList.contains('truncated')) {
         commentDiv.classList.remove('truncated');
         button.textContent = 'Read less';

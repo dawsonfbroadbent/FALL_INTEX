@@ -55,40 +55,43 @@
       </div>
       <% } %>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Participant Name</th>
-            <th>Milestone Title</th>
-            <th>Date</th>
-            <% if (canEdit) { %>
-            <th>Actions</th>
+      <!-- ✅ Scrollable table container (sticky header) -->
+      <div class="table-scroll" role="region" aria-label="Milestones table" tabindex="0">
+        <table class="sticky-table">
+          <thead>
+            <tr>
+              <th>Participant Name</th>
+              <th>Milestone Title</th>
+              <th>Date</th>
+              <% if (canEdit) { %>
+              <th>Actions</th>
+              <% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (milestones.length === 0) { %>
+            <tr>
+              <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No milestones found.</td>
+            </tr>
+            <% } else { %>
+            <% milestones.forEach(m => { %>
+            <tr>
+              <td><%= m.participant %></td>
+              <td><%= m.title || 'N/A' %></td>
+              <td><%= m.date ? new Date(m.date).toLocaleDateString() : 'N/A' %></td>
+              <% if (canEdit) { %>
+              <td class="action-buttons">
+                <form action="/milestones" method="POST" style="display: inline;" onsubmit="return confirm('Delete this milestone?')">
+                  <button type="submit" class="btn-delete">Delete</button>
+                </form>
+              </td>
+              <% } %>
+            </tr>
+            <% }) %>
             <% } %>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (milestones.length === 0) { %>
-          <tr>
-            <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No milestones found.</td>
-          </tr>
-          <% } else { %>
-          <% milestones.forEach(m => { %>
-          <tr>
-            <td><%= m.participant %></td>
-            <td><%= m.title || 'N/A' %></td>
-            <td><%= m.date ? new Date(m.date).toLocaleDateString() : 'N/A' %></td>
-            <% if (canEdit) { %>
-            <td class="action-buttons">
-              <form action="/milestones" method="POST" style="display: inline;" onsubmit="return confirm('Delete this milestone?')">
-                <button type="submit" class="btn-delete">Delete</button>
-              </form>
-            </td>
-            <% } %>
-          </tr>
-          <% }) %>
-          <% } %>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 
