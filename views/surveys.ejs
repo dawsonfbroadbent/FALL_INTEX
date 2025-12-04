@@ -52,10 +52,18 @@
       <table>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Participant Email</th>
-            <th>Created</th>
+            <th>Participant Name</th>
+            <th>Event Name</th>
+            <th>Satisfaction Score</th>
+            <th>Usefulness Score</th>
+            <th>Instructor Score</th>
+            <th>Recommendation Score</th>
+            <th>Overall Score</th>
+            <% if (canEdit) { %>
+            <th>Net Promoter Score</th>
+            <% } %>
+            <th>Comments</th>
+            <th>Survey Date</th>
             <% if (canEdit) { %>
             <th>Actions</th>
             <% } %>
@@ -64,15 +72,23 @@
         <tbody>
           <% if (surveys.length === 0) { %>
           <tr>
-            <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No surveys found.</td>
+            <td colspan="<%= canEdit ? 10 : 9 %>" style="text-align: center; color: #666;">No surveys found.</td>
           </tr>
           <% } else { %>
           <% surveys.forEach(s => { %>
           <tr>
-            <td><%= s.id %></td>
-            <td><%= s.title %></td>
-            <td><%= s.participant_email || 'N/A' %></td>
-            <td><%= s.created_at ? new Date(s.created_at).toLocaleDateString() : 'N/A' %></td>
+            <td><%= s.participantname %></td>
+            <td><%= s.eventname %></td>
+            <td><%= s.surveysatisfactionscore %></td>
+            <td><%= s.surveyusefulnessscore %></td>
+            <td><%= s.surveyinstructorscore %></td>
+            <td><%= s.surveyrecommendationscore %></td>
+            <td><%= (s.surveysatisfactionscore + s.surveyusefulnessscore + s.surveyinstructorscore + s.surveyrecommendationscore) / 4 %></td>
+            <% if (canEdit) { %>
+            <td><%= s.surveynpsbucket %></td>
+            <% } %>
+            <td><%= s.surveycomments %></td>
+            <td><%= s.surveysubmissiondate ? new Date(s.surveysubmissiondate).toLocaleDateString() : 'N/A' %></td>
             <% if (canEdit) { %>
             <td class="action-buttons">
               <form action="/surveys/<%= s.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this survey?')">

@@ -378,14 +378,29 @@ app.get("/surveys", requireAuth, async (req, res) => {
   // Retrive survey responses from database (if request includes search, incldue in knex query)
   const q = (req.query.q || "").trim();
   try {
-    let query = knex("surveyresponse").select("*").orderBy("surveysubmissiondate", "desc");
+    let query = knex("surveyresponse")
+    .select(
+        'surveyresponse.surveysubmissiondate',
+        'surveyresponse.surveysatisfactionscore',
+        'surveyresponse.surveyusefulnessscore',
+        'surveyresponse.surveyinstructorscore',
+        'surveyresponse.surveyrecommendationscore',
+        'surveyresponse.surveycomments',
+        // Join and select fields from other tables
+        knex.raw("?? || ' ' || ?? as participantname", ['participant.participantfirstname', 'participant.participantlastname']),
+        'eventoccurrence.eventname',
+        'npsbucket.surveynpsbucket'
+    )
+    .leftJoin('participant', 'surveyresponse.participantid', 'participant.participantid')
+    .leftJoin('eventoccurrence', 'surveyresponse.eventid', 'eventoccurrence.eventid')
+    .leftJoin('npsbucket', 'surveyresponse.surveyrecommendationscore', 'npsbucket.surveyrecommendationscore')
+    .orderBy("surveysubmissiondate", "desc");
     if (q) {
-      query = query
-      .join("participant", 'surveyresponse.participantid', 'participant.participantid')
-      .join("eventoccurrence", 'surveyresponse.eventid', 'eventoccurrence.eventid').where((b) => {
-        b.whereILike("participant.participantemail", `%${q}%`).orWhereILike("eventoccurrence.eventname", `%${q}%`)
-        .orWhereILike("eventoccurrence.eventlocation", `%${q}%`);
-      });
+        query.where((b) => {
+            b.whereILike("participant.participantemail", `%${q}%`)
+              .orWhereILike("eventoccurrence.eventname", `%${q}%`)
+              .orWhereILike("eventoccurrence.eventlocation", `%${q}%`);
+        });
     }
     const surveys = await query;
 
