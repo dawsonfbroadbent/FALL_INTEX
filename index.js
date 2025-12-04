@@ -302,7 +302,7 @@ app.post("/participants/:id/edit", requireAuth, requireAdmin, async (req, res) =
 });
 
 // Delete participant route
-app.post("/participants/:participantid/delete", requireAuth, requireManager, async (req, res) => {
+app.post("/participants/:participantid/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("participant").where({ "participantid": req.params.participantid }).del();
     res.redirect("/participants");
@@ -371,7 +371,7 @@ app.post("/events/:id/edit", requireAuth, requireAdmin, async (req, res) => {
 });
 
 // Delete event route
-app.post("/events/:eventid/delete", requireAuth, requireManager, async (req, res) => {
+app.post("/events/:eventid/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("eventoccurrence").where({ "eventid": req.params.eventid }).del();
     res.redirect("/events");
