@@ -33,41 +33,52 @@
       </div>
 
       <% if (canEdit) { %>
-      <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
-        <h3 style="margin-bottom: 20px;">Add New Event</h3>
-        <form action="/events/add" method="POST">
-          <div class="form-group">
-            <label for="event_name">Event Name</label>
-            <select id="event_name" name="event_name" required>
-              <option value="">Select an event...</option>
-              <% eventtemplates.forEach(function(template) { %>
-                <option value="<%= template.eventname %>"><%= template.eventname %></option>
-              <% }); %>
-            </select>
-          </div>
-          <div class="form-row">
+        <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
+          <h3 style="margin-bottom: 20px;">Add New Event</h3>
+        
+          <form action="/events/add" method="POST">
             <div class="form-group">
-              <label for="eventdatetimestart">Start Date and Time</label>
-              <input type="datetime" id="eventdatetimestart" name="eventdatetimestart" required>
+              <label for="event_name">Event Name</label>
+              <select id="event_name" name="event_name" required>
+                <option value="">Select an event...</option>
+                <% eventtemplates.forEach(function(template) { %>
+                  <option value="<%= template.eventname %>"><%= template.eventname %></option>
+                <% }); %>
+              </select>
             </div>
-            <div class="form-group">
-              <label for="eventdatetimeend">End Date and Time</label>
-              <input type="datetime" id="eventdatetimeend" name="eventdatetimeend" required>
+        
+            <div class="form-row">
+              <div class="form-group">
+                <label for="eventdatetimestart">Start Date and Time</label>
+                <input type="datetime-local" id="eventdatetimestart" name="eventdatetimestart" required>
+              </div>
+        
+              <div class="form-group">
+                <label for="eventdatetimeend">End Date and Time</label>
+                <input type="datetime-local" id="eventdatetimeend" name="eventdatetimeend" required>
+              </div>
             </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="eventlocation">Location</label>
-              <input type="text" id="eventlocation" name="eventlocation">
+        
+            <div class="form-row">
+              <div class="form-group">
+                <label for="eventlocation">Location</label>
+                <select id="eventlocation" name="eventlocation">
+                  <option value="">Select a location...</option>
+                  <% locations.forEach(function(loc) { %>
+                    <option value="<%= loc.eventlocation %>"><%= loc.eventlocation %></option>
+                  <% }); %>
+                </select>
+              </div>
+        
+              <div class="form-group">
+                <label for="eventregistrationdeadline">Registration Deadline</label>
+                <input type="datetime-local" id="eventregistrationdeadline" name="eventregistrationdeadline" required>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="eventregistrationdeadline">Registration Deadline</label>
-              <input type="datetime" id="eventregistrationdeadline" name="eventregistrationdeadline" required>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary">Add Event</button>
-        </form>
-      </div>
+        
+            <button type="submit" class="btn btn-primary">Add Event</button>
+          </form>
+        </div>
       <% } %>
 
       <!-- ✅ Scrollable table container (sticky header) -->
@@ -80,60 +91,185 @@
               <th>End Date and Time</th>
               <th>Location</th>
               <th>Registration Deadline</th>
-              <% if (canEdit) { %>
-              <th>Actions</th>
-              <% } %>
+              <% if (canEdit) { %><th>Actions</th><% } %>
             </tr>
           </thead>
           <tbody>
             <% if (events.length === 0) { %>
             <tr>
-              <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No events found.</td>
+              <td colspan="<%= canEdit ? 6 : 5 %>" style="text-align: center; color: #666;">No events found.</td>
             </tr>
             <% } else { %>
+
             <% events.forEach(e => { %>
             <tr>
               <td><%= e.eventname %></td>
+
               <td><%= e.eventdatetimestart ? new Date(e.eventdatetimestart).toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
+                year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
               }) : 'TBD' %></td>
+
               <td><%= e.eventdatetimeend ? new Date(e.eventdatetimeend).toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
+                year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
               }) : 'TBD' %></td>
+
               <td><%= e.eventlocation || 'TBD' %></td>
+
               <td><%= e.eventregistrationdeadline ? new Date(e.eventregistrationdeadline).toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
+                year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
               }) : 'TBD' %></td>
+
               <% if (canEdit) { %>
               <td class="action-buttons">
+
+                <!-- ✅ Edit button with data attributes -->
+                <button
+                  type="button"
+                  class="btn-edit"
+                  data-eventid="<%= e.eventid %>"
+                  data-eventname="<%= e.eventname || '' %>"
+                  data-start="<%= e.eventdatetimestart ? new Date(e.eventdatetimestart).toISOString() : '' %>"
+                  data-end="<%= e.eventdatetimeend ? new Date(e.eventdatetimeend).toISOString() : '' %>"
+                  data-location="<%= e.eventlocation || '' %>"
+                  data-deadline="<%= e.eventregistrationdeadline ? new Date(e.eventregistrationdeadline).toISOString() : '' %>"
+                  onclick="openEditModal(this)"
+                >
+                  Edit
+                </button>
+
+                <!-- ✅ Delete -->
                 <form action="/events/<%= e.eventid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this event?')">
                   <button type="submit" class="btn-delete">Delete</button>
                 </form>
+
               </td>
               <% } %>
             </tr>
             <% }) %>
+
             <% } %>
           </tbody>
         </table>
       </div>
     </div>
   </section>
+
+  <!-- ✅ Edit Modal -->
+  <% if (canEdit) { %>
+    <div id="editModalBackdrop" class="modal-backdrop" onclick="backdropClose(event)">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <h3 id="editModalTitle">Edit Event</h3>
+          <button class="modal-close" type="button" onclick="closeEditModal()" aria-label="Close">×</button>
+        </div>
+        <div class="modal-body">
+          <form id="editEventForm" method="POST">
+            <div class="form-group">
+              <label for="edit_eventname">Event Name</label>
+              <select id="edit_eventname" name="eventname" required>
+                <option value="">Select an event...</option>
+                <% eventtemplates.forEach(function(template) { %>
+                  <option value="<%= template.eventname %>"><%= template.eventname %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="edit_start">Start Date and Time</label>
+                <input type="datetime-local" id="edit_start" name="eventdatetimestart" required>
+              </div>
+              <div class="form-group">
+                <label for="edit_end">End Date and Time</label>
+                <input type="datetime-local" id="edit_end" name="eventdatetimeend" required>
+              </div>
+            </div>
+  
+            <div class="form-row">
+              <div class="form-group">
+                <label for="edit_location">Location</label>
+                <select id="edit_location" name="eventlocation">
+                  <option value="">Select a location...</option>
+                  <% locations.forEach(function(loc) { %>
+                    <option value="<%= loc.eventlocation %>"><%= loc.eventlocation %></option>
+                  <% }); %>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="edit_deadline">Registration Deadline</label>
+                <input type="datetime-local" id="edit_deadline" name="eventregistrationdeadline" required>
+              </div>
+            </div>
+  
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  <% } %>
+    
+  <script>
+    function toDatetimeLocal(isoString) {
+      if (!isoString) return '';
+      const d = new Date(isoString);
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function openEditModal(button) {
+      const backdrop = document.getElementById('editModalBackdrop');
+      const form = document.getElementById('editEventForm');
+      if (!backdrop || !form) return;
+
+      // Get data from button attributes
+      const eventid = button.dataset.eventid;
+      const eventname = button.dataset.eventname;
+      const start = button.dataset.start;
+      const end = button.dataset.end;
+      const location = button.dataset.location;
+      const deadline = button.dataset.deadline;
+
+      form.action = `/events/${eventid}/edit`;
+
+      document.getElementById('edit_eventname').value = eventname || '';
+      document.getElementById('edit_start').value = toDatetimeLocal(start);
+      document.getElementById('edit_end').value = toDatetimeLocal(end);
+      document.getElementById('edit_location').value = location || '';
+      document.getElementById('edit_deadline').value = toDatetimeLocal(deadline);
+
+      backdrop.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+
+      console.log("dataset:", button.dataset);
+      console.log("computed action:", `/events/${button.dataset.eventid}/edit`);
+    }
+
+    function closeEditModal() {
+      const backdrop = document.getElementById('editModalBackdrop');
+      if (!backdrop) return;
+      backdrop.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function backdropClose(event) {
+      // Only close if clicking the backdrop itself, not the modal content
+      if (event.target.id === 'editModalBackdrop') {
+        closeEditModal();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeEditModal();
+    });
+
+    document.getElementById("editEventForm")?.addEventListener("submit", (e) => {
+      const fd = new FormData(e.target);
+      console.log("Submitting to:", e.target.action);
+      console.log("Payload:", Object.fromEntries(fd.entries()));
+    });
+  </script>
 
   <%- include('partials/footer') %>
 </body>
