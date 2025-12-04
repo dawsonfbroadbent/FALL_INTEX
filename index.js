@@ -226,18 +226,24 @@ app.get('/programs', (req, res) => {
   });
 });
 
-// Public donation submit (for donors/supporters). Adjust fields to match your DB columns.
-app.post("/donations/public", async (req, res) => {
-  // Example expected body fields (rename to match your table):
-  // donor_name, donor_email, amount, donation_date
+// Add donation route
+app.post("/donations/add", async (req, res) => {
   try {
-    const newDonation = {
-      donor_name: req.body.donor_name || null,
-      donor_email: req.body.donor_email || null,
-      amount: req.body.amount ? Number(req.body.amount) : null,
-      donation_date: req.body.donation_date || new Date(),
-      created_at: new Date(),
+    let participantResult = await knex("participant").select("participantid").where({"participantemail": req.body.participant_email}).first();
+    if (!participantResult) {
+      return res.status(404).send("Participant not found with that email");
     };
+    let participantid = participantResult.participantid;
+    let donationamount = req.body.amount;
+    let donationdate = new Date();
+    let lastdonation = await knex("donations").where({"participantid": participantid}).max("donationnumber as max").first();
+    let donationnumber;
+    if (!lastdonation || lastdonation.max === null) {
+      donationnumber = 1;
+    } else {
+      donationnumber = lastdonation.max + 1;
+    };
+    const newDonation = {participantid, donationnumber, donationdate, donationamount};
 
     await knex("donations").insert(newDonation);
     return res.redirect("/donations");
@@ -252,11 +258,10 @@ app.post("/donations/public", async (req, res) => {
   }
 });
 
-// Admin-only donation maintenance (example delete)
-app.post("/donations/:id/delete", requireAuth, requireAdmin, async (req, res) => {
+// Delete donation route
+app.post("/donations/:participantid/:donationnumber/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
-    // Delete donation record with associated ID from database and redirect to donations route
-    await knex("donations").where({ id: req.params.id }).del();
+    await knex("donations").where({ "participantid": req.params.participantid }).andWhere({ "donationnumber": req.params.donationnumber }).del();
     res.redirect("/donations");
   } catch (err) {
     res.status(500).send(err.message);
@@ -437,16 +442,18 @@ app.get("/surveys", requireAuth, async (req, res) => {
   try {
     let query = knex("surveyresponse")
     .select(
-        'surveyresponse.surveysubmissiondate',
-        'surveyresponse.surveysatisfactionscore',
-        'surveyresponse.surveyusefulnessscore',
-        'surveyresponse.surveyinstructorscore',
-        'surveyresponse.surveyrecommendationscore',
-        'surveyresponse.surveycomments',
-        // Join and select fields from other tables
-        knex.raw("?? || ' ' || ?? as participantname", ['participant.participantfirstname', 'participant.participantlastname']),
-        'eventoccurrence.eventname',
-        'npsbucket.surveynpsbucket'
+      'surveyresponse.participantid',
+      'surveyresponse.eventid',
+      'surveyresponse.surveysubmissiondate',
+      'surveyresponse.surveysatisfactionscore',
+      'surveyresponse.surveyusefulnessscore',
+      'surveyresponse.surveyinstructorscore',
+      'surveyresponse.surveyrecommendationscore',
+      'surveyresponse.surveycomments',
+      // Join and select fields from other tables
+      knex.raw("?? || ' ' || ?? as participantname", ['participant.participantfirstname', 'participant.participantlastname']),
+      'eventoccurrence.eventname',
+      'npsbucket.surveynpsbucket'
     )
     .leftJoin('participant', 'surveyresponse.participantid', 'participant.participantid')
     .leftJoin('eventoccurrence', 'surveyresponse.eventid', 'eventoccurrence.eventid')
@@ -479,12 +486,24 @@ app.get("/surveys", requireAuth, async (req, res) => {
   }
 });
 
-/*
-We need to change this to redirect to another ejs file
-*/
+
+// Add survey route
 app.post("/surveys/add", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("surveyresponse").insert(req.body);
+    let participantResult = await knex("participant").select("participantid").where({"participantemail": req.body.participant_email}).first()
+    if (!participantResult) {
+      return res.status(404).send("Participant not found with that email");
+    }
+    let participantid = participantResult.participantid
+    let eventid = req.body.event;
+    let surveysatisfactionscore = req.body.sat;
+    let surveyusefulnessscore = req.body.use;
+    let surveyinstructorscore = req.body.inst;
+    let surveyrecommendationscore = req.body.rec;
+    let surveycomments = req.body.comment;
+    let surveysubmissiondate = req.body.submissiondate;
+    let newSurvey = {participantid, eventid, surveysatisfactionscore, surveyusefulnessscore, surveyinstructorscore, surveyrecommendationscore, surveycomments, surveysubmissiondate};
+    await knex("surveyresponse").insert(newSurvey);
     res.redirect("/surveys");
   } catch (err) {
     res.status(500).send(err.message);
@@ -494,7 +513,7 @@ app.post("/surveys/add", requireAuth, requireAdmin, async (req, res) => {
 /*
 We need to change this to redirect to another ejs file
 */
-app.post("/surveys/:id/edit", requireAuth, requireAdmin, async (req, res) => {
+app.post("/surveys/:participantid/:eventid/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
     await knex("surveyresponse").where({ id: req.params.id }).update(req.body);
     res.redirect("/surveys");
@@ -504,9 +523,9 @@ app.post("/surveys/:id/edit", requireAuth, requireAdmin, async (req, res) => {
 });
 
 // Delete survey response route
-app.post("/surveys/:id/delete", requireAuth, requireAdmin, async (req, res) => {
+app.post("/surveys/:participantid/:eventid/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("surveyresponse").where({ id: req.params.id }).del();
+    await knex("surveyresponse").where({ "participantid": req.params.participantid }).andWhere({ "eventid": req.params.eventid }).del();
     res.redirect("/surveys");
   } catch (err) {
     res.status(500).send(err.message);
@@ -563,12 +582,18 @@ app.get("/milestones", requireAuth, async (req, res) => {
   }
 });
 
-/*
-We need to change this to redirect to another ejs file
-*/
+// Add milestone route
 app.post("/milestones/add", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("milestones").insert(req.body);
+    let participantResult = await knex("participant").select("participantid").where({"participantemail": req.body.participant_email}).first();
+    if (!participantResult) {
+      return res.status(404).send("Participant not found with that email");
+    };
+    let participantid = participantResult.participantid;
+    let milestonetitle = req.body.milestonetitle;
+    let milestonedate = req.body.milestonedate;
+    let newMilestone = {participantid, milestonetitle, milestonedate};
+    await knex("milestones").insert(newMilestone);
     res.redirect("/milestones");
   } catch (err) {
     res.status(500).send(err.message);
@@ -588,9 +613,9 @@ app.post("/milestones/:id/edit", requireAuth, requireAdmin, async (req, res) => 
 });
 
 // Delete milestone route
-app.post("/milestones/:id/delete", requireAuth, requireAdmin, async (req, res) => {
+app.post("/milestones/:participantid/:milestonedate/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("milestones").where({ id: req.params.id }).del();
+    await knex("milestones").where({ "participantid": req.params.participantid }).andWhere({ "milestonedate": req.params.milestonedate }).del();
     res.redirect("/milestones");
   } catch (err) {
     res.status(500).send(err.message);
