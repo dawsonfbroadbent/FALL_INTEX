@@ -17,6 +17,7 @@ body {
   padding: 0 24px;
 }
 
+/* Header base styles */
 header {
   background: #F2C6C6;
   padding: 15px 0;
@@ -57,16 +58,16 @@ header nav a:hover {
   transform: translateY(-1px);
 }
 
-/* Active page highlight (Express sets "active" class below) */
+/* Active page highlight */
 header nav a.active {
   background: rgba(242, 198, 198, 0.55);
   box-shadow: 0 8px 18px rgba(0,0,0,0.06);
 }
 
-/* Keep Donate looking like a button (don’t get pill hover styles) */
+/* Keep Donate looking like a button */
 header nav a.btn {
-  padding: 10px 16px; /* slightly larger */
-  border-radius: 14px; /* more "button" than pill */
+  padding: 10px 16px;
+  border-radius: 14px;
   background: #0B0B0B;
   color: #fff;
 }
@@ -87,22 +88,82 @@ header nav a:focus-visible {
   height: 60px;
 }
 
-nav {
-  display: flex;
-  align-items: center;
-  gap: 25px;
+/* Dropdown Styles */
+.dropdown {
+  position: relative;
+  display: inline-block;
 }
 
-nav a {
+.dropdown-toggle {
+  cursor: pointer;
+  user-select: none;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  text-decoration: none;
+  color: #111;
+  padding: 10px 12px;
+  border-radius: 999px;
+  transition: background 0.15s ease, transform 0.12s ease, opacity 0.15s ease;
+}
+
+.dropdown-toggle:hover {
+  background: rgba(242, 198, 198, 0.35);
+  transform: translateY(-1px);
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #ffffff;
+  min-width: 180px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 14px;
+  padding: 8px 0;
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px 20px;
   color: #111;
   text-decoration: none;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  font-weight: 600;
   font-size: 14px;
-  transition: color 0.3s;
+  border-radius: 0;
 }
 
-nav a:hover {
-  color: #333;
+.dropdown-menu a:hover {
+  background-color: rgba(242, 198, 198, 0.35);
+  transform: none;
 }
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+/* Add a small animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown:hover .dropdown-menu {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Buttons! */
 
 .btn {
   display: inline-block;

@@ -97,7 +97,7 @@ app.post("/login", async (req, res) => {
   try {
     // Search for the user in the database by username, and check to make sure a user was returned
     const user = await knex("participant")
-      .select("participantid", "participantemail", "password", "participantrole")
+      .select("participantid", "participantemail", "password", "participantfirstname", "participantlastname", "participantrole")
       .where({ participantemail })
       .first();
 
@@ -115,6 +115,8 @@ app.post("/login", async (req, res) => {
     req.session.isLoggedIn = true;
     req.session.userId = user.participantid;
     req.session.username = user.participantemail;
+    req.session.firstname = user.participantfirstname;
+    req.session.lastname = user.participantlastname;
     req.session.level = user.participantrole;
 
     // Go to landing page, now logged in
