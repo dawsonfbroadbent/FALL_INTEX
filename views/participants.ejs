@@ -104,41 +104,44 @@
       </div>
       <% } %>
 
-      <table>
-        <thead>
-          <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <% if (canEdit) { %>
-            <th>Actions</th>
+      <!-- ✅ Scrollable table container (sticky header) -->
+      <div class="table-scroll" role="region" aria-label="Participants table" tabindex="0">
+        <table class="sticky-table">
+          <thead>
+            <tr>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Email</th>
+              <% if (canEdit) { %>
+              <th>Actions</th>
+              <% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (participants.length === 0) { %>
+            <tr>
+              <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No participants found.</td>
+            </tr>
+            <% } else { %>
+            <% participants.forEach(p => { %>
+            <tr>
+              <td><%= p.participantfirstname %></td>
+              <td><%= p.participantlastname %></td>
+              <td><%= p.participantemail || 'N/A' %></td>
+              <% if (canEdit) { %>
+              <td class="action-buttons">
+                <a href="/milestones?participantid=<%= p.participantid %>" class="btn-edit">Milestones</a>
+                <form action="/participants/<%= p.participantid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this participant?')">
+                  <button type="submit" class="btn-delete">Delete</button>
+                </form>
+              </td>
+              <% } %>
+            </tr>
+            <% }) %>
             <% } %>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (participants.length === 0) { %>
-          <tr>
-            <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No participants found.</td>
-          </tr>
-          <% } else { %>
-          <% participants.forEach(p => { %>
-          <tr>
-            <td><%= p.participantfirstname %></td>
-            <td><%= p.participantlastname %></td>
-            <td><%= p.participantemail || 'N/A' %></td>
-            <% if (canEdit) { %>
-            <td class="action-buttons">
-              <a href="/milestones?participantid=<%= p.participantid %>" class="btn-edit">Milestones</a>
-              <form action="/participants/<%= p.participantid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this participant?')">
-                <button type="submit" class="btn-delete">Delete</button>
-              </form>
-            </td>
-            <% } %>
-          </tr>
-          <% }) %>
-          <% } %>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 
