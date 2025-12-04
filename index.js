@@ -447,17 +447,18 @@ app.get("/milestones", requireAuth, async (req, res) => {
   const q = (req.query.q || "").trim();
   try {
     // Get all milestones from database (search for individual's milestones if included in request)
-    let query = knex("milestones").select("*").orderBy("milestone_date", "desc");
+    let query = knex("milestones").select("*").orderBy("milestonedate", "desc");
     if (participantId) query = query
     .join("participant", 'milestones.participantid', 'participant.participantid')
     .where((b) => {
       b.whereILike("participant.participantemail", `%${q}%`).orWhereILike("participant.participantfirstname", `%${q}%`)
       .orWhereILike("participant.participantlastname", `%${q}%`).orWhereILike("milestones.milestonetitle", `%${q}%`)});
     const all = await query;
-
+    
+    let milestones = [];
     for (let iCount = 0; iCount < all.length; iCount++) {
-      let donationDate = all[iCount].milestonedate;
-      let formattedDate = new Date(donationDate).toLocaleDateString("en-US", {
+      let milestoneDate = all[iCount].milestonedate;
+      let formattedDate = new Date(milestoneDate).toLocaleDateString("en-US", {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit'
@@ -465,7 +466,7 @@ app.get("/milestones", requireAuth, async (req, res) => {
       let milestoneTitle = all[iCount].milestonetitle
       let donor = await knex("participant").select("participantfirstname", "participantlastname").where({"participantid": all[iCount].participantid}).first();
       let donorFullName = donor.participantfirstname + " " + donor.participantlastname;
-      donations.push({
+      milestones.push({
         date: formattedDate,
         title: milestoneTitle,
         participant: donorFullName
