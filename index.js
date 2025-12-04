@@ -356,15 +356,33 @@ app.post("/participants/add", requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
-/*
-We need to change this to redirect to another ejs file
-*/
-app.post("/participants/:id/edit", requireAuth, requireAdmin, async (req, res) => {
+// Edit participant route
+app.post("/participants/:participantid/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("participant").where({ id: req.params.id }).update(req.body);
+    const participantid = req.params.participantid;
+
+    const updates = {
+      participantfirstname: req.body.firstname,
+      participantlastname: req.body.lastname,
+      participantemail: req.body.email,
+      password: req.body.password,
+      participantdob: req.body.dob || null,
+      participantphone: req.body.phone || null,
+      participantcity: req.body.city || null,
+      participantstate: req.body.state || null,
+      participantzip: req.body.zip || null,
+      participantschooloremployer: req.body.school_employer || null,
+      participantfieldofinterest: req.body.field_of_interest || null,
+    };
+
+    await knex("participant")
+      .where({ participantid })
+      .update(updates);
+
     res.redirect("/participants");
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error("Edit participant error:", err);
+    res.redirect("/participants?error=Edit%20failed");
   }
 });
 
