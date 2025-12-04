@@ -33,47 +33,40 @@
       </div>
 
       <% if (canEdit) { %>
-        <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
-          <h3 style="margin-bottom: 20px;">Add New Event</h3>
-        
-          <form action="/events/add" method="POST">
+      <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
+        <h3 style="margin-bottom: 20px;">Add New Event</h3>
+        <form action="/events/add" method="POST">
+          <div class="form-group">
+            <label for="event_name">Event Name</label>
+            <select id="event_name" name="event_name" required>
+              <option value="">Select an event...</option>
+              <% eventtemplates.forEach(function(template) { %>
+                <option value="<%= template.eventname %>"><%= template.eventname %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="form-row">
             <div class="form-group">
-              <label for="event_name">Event Name</label>
-              <select id="event_name" name="event_name" required>
-                <option value="">Select an event...</option>
-                <% eventtemplates.forEach(function(template) { %>
-                  <option value="<%= template.eventname %>"><%= template.eventname %></option>
-                <% }); %>
-              </select>
+              <label for="eventdatetimestart">Start Date and Time</label>
+              <input type="datetime-local" id="eventdatetimestart" name="eventdatetimestart" required>
             </div>
-        
-            <div class="form-row">
-              <div class="form-group">
-                <label for="eventdatetimestart">Start Date and Time</label>
-                <input type="datetime-local" id="eventdatetimestart" name="eventdatetimestart" required>
-              </div>
-        
-              <div class="form-group">
-                <label for="eventdatetimeend">End Date and Time</label>
-                <input type="datetime-local" id="eventdatetimeend" name="eventdatetimeend" required>
-              </div>
+            <div class="form-group">
+              <label for="eventdatetimeend">End Date and Time</label>
+              <input type="datetime-local" id="eventdatetimeend" name="eventdatetimeend" required>
             </div>
-        
-            <div class="form-row">
-              <div class="form-group">
-                <label for="eventlocation">Location</label>
-                <select id="eventlocation" name="eventlocation">
-                  <option value="">Select a location...</option>
-                  <% locations.forEach(function(loc) { %>
-                    <option value="<%= loc.eventlocation %>"><%= loc.eventlocation %></option>
-                  <% }); %>
-                </select>
-              </div>
-        
-              <div class="form-group">
-                <label for="eventregistrationdeadline">Registration Deadline</label>
-                <input type="datetime-local" id="eventregistrationdeadline" name="eventregistrationdeadline" required>
-              </div>
+          </div>
+          <div class="form-group">
+            <label for="eventlocation">Location</label>
+            <select id="eventlocation" name="eventlocation">
+              <option value="">Select a location...</option>
+              <% locations.forEach(function(loc) { %>
+                <option value="<%= loc.eventlocation %>"><%= loc.eventlocation %></option>
+              <% }); %>
+            </select>
+          </div>
+            <div class="form-group">
+              <label for="eventregistrationdeadline">Registration Deadline</label>
+              <input type="datetime-local" id="eventregistrationdeadline" name="eventregistrationdeadline" required>
             </div>
         
             <button type="submit" class="btn btn-primary">Add Event</button>
