@@ -219,7 +219,7 @@ app.get("/logout", (req, res) => {
 
 // Donation page route
 app.get("/donate", (req, res) => {
-  res.render('donate.ejs', { error_message: "" }); // Build new page and redirect to it rather than use external page
+  res.render('donate.ejs', { error_message: "" });
 });
 
 // About page route
