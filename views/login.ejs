@@ -10,31 +10,38 @@
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
+  <!-- Global navigation/header -->
   <%- include('partials/header') %>
 
+  <!-- LOGIN CONTAINER: Centers login card on screen -->
   <div class="login-container">
     <div class="login-card">
       <h1>Login</h1>
       
+      <!-- CONDITIONAL ERROR MESSAGE (rendered only when error_message is passed from server) -->
       <% if (error_message) { %>
       <div class="alert alert-error"><%= error_message %></div>
       <% } %>
 
+      <!-- LOGIN FORM -->
       <form action="/login" method="POST">
+        <!-- Email input -->
         <div class="form-group">
           <label for="email">Email</label>
           <input type="email" id="email" name="email" required>
         </div>
+        <!-- Password input -->
         <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" name="password" required>
         </div>
 
+        <!-- Submit button -->
         <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
 
-        <!-- Subtle create account helper -->
+        <!-- Account creation link -->
         <div style="margin-top: 10px; text-align: center; font-size: 13px; opacity: 0.8;">
-          <span>Don’t have an account?</span>
+          <span>Don't have an account?</span>
           <a href="/createaccount"
              style="background: none; border: none; padding: 0; margin-left: 4px; font: inherit; font-weight: 700; color: inherit; text-decoration: underline; cursor: pointer;">
             Create one
@@ -44,6 +51,7 @@
     </div>
   </div>
 
+  <!-- Global footer -->
   <%- include('partials/footer') %>
 </body>
 </html>

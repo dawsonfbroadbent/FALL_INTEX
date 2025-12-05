@@ -10,59 +10,69 @@
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
+    <!-- Global navigation/header -->
     <%- include('partials/header') %>
 
+    <!-- HERO SECTION: Main welcome banner -->
     <section class="hero">
     <div class="container">
         <h1>WELCOME TO ELLA RISES</h1>
         <p>Empowering young women ages 11-18 to pursue higher education while embracing and celebrating their cultural heritage through mariachi, ballet folklorico, and STEAM.</p>
         <div class="hero-buttons">
+        <!-- Primary call-to-action buttons -->
         <a href="/donate" class="btn btn-primary">Donate Now</a>
         <a href="/contact" class="btn btn-secondary">Get Involved</a>
         </div>
     </div>
     </section>
 
+    <!-- PROGRAMS SECTION -->
     <section>
     <div class="container">
         <h2>Our Programs</h2>
+        <!-- Grid layout for program cards -->
         <div class="programs-grid">
-        <div class="program-card">
-            <img src="/images/activities/ballet_cropped.png" alt="Ballet Folklorico">
-            <div class="program-card-content">
-            <h3>Ballet Folklorico</h3>
-            <p>A cultural dance program building confidence, discipline, teamwork, and connection to heritage through traditional Mexican dance. Ages 11-18, Mondays at 7:00 PM.</p>
-            <a href="/programs#ballet-folklorico" class="btn btn-secondary">Learn More</a>
+            <!-- Ballet Folklorico Program -->
+            <div class="program-card">
+                <img src="/images/activities/ballet_cropped.png" alt="Ballet Folklorico">
+                <div class="program-card-content">
+                <h3>Ballet Folklorico</h3>
+                <p>A cultural dance program building confidence, discipline, teamwork, and connection to heritage through traditional Mexican dance. Ages 11-18, Mondays at 7:00 PM.</p>
+                <a href="/programs#ballet-folklorico" class="btn btn-secondary">Learn More</a>
+                </div>
             </div>
-        </div>
-        <div class="program-card">
-            <img src="/images/activities/mariachi_cropped.png" alt="Mariachi">
-            <div class="program-card-content">
-            <h3>Mariachi</h3>
-            <p>Learn traditional mariachi instruments including violin, trumpet, guitarron, vihuela, and guitar. Ages 11-18, Mondays 5:30-6:45 PM. $45 annual fee.</p>
-            <a href="/programs#mariachi" class="btn btn-secondary">Learn More</a>
+            <!-- Mariachi Program -->
+            <div class="program-card">
+                <img src="/images/activities/mariachi_cropped.png" alt="Mariachi">
+                <div class="program-card-content">
+                <h3>Mariachi</h3>
+                <p>Learn traditional mariachi instruments including violin, trumpet, guitarron, vihuela, and guitar. Ages 11-18, Mondays 5:30-6:45 PM. $45 annual fee.</p>
+                <a href="/programs#mariachi" class="btn btn-secondary">Learn More</a>
+                </div>
             </div>
-        </div>
-        <div class="program-card">
-            <img src="/images/activities/learning.avif" alt="STEAM Workshops">
-            <div class="program-card-content">
-            <h3>STEAM Workshops</h3>
-            <p>Virtual and in-person workshops in partnership with Thanksgiving Point, UVU, and BYU. Building inquiry, critical thinking, and career exposure.</p>
-            <a href="/programs#steam" class="btn btn-secondary">Learn More</a>
+            <!-- STEAM Workshops -->
+            <div class="program-card">
+                <img src="/images/activities/learning.avif" alt="STEAM Workshops">
+                <div class="program-card-content">
+                <h3>STEAM Workshops</h3>
+                <p>Virtual and in-person workshops in partnership with Thanksgiving Point, UVU, and BYU. Building inquiry, critical thinking, and career exposure.</p>
+                <a href="/programs#steam" class="btn btn-secondary">Learn More</a>
+                </div>
             </div>
-        </div>
-        <div class="program-card">
-            <img src="/images/activities/summer_summit.jpg" alt="Summit & Educational Pathways">
-            <div class="program-card-content">
-            <h3>Summit & Educational Pathways</h3>
-            <p>A signature day camp experience with art, STEM, and education programming, ending with a tour of a local university or technical college. Ages 11-18.</p>
-            <a href="/programs#summit" class="btn btn-secondary">Learn More</a>
+            <!-- Summit Program -->
+            <div class="program-card">
+                <img src="/images/activities/summer_summit.jpg" alt="Summit & Educational Pathways">
+                <div class="program-card-content">
+                <h3>Summit & Educational Pathways</h3>
+                <p>A signature day camp experience with art, STEM, and education programming, ending with a tour of a local university or technical college. Ages 11-18.</p>
+                <a href="/programs#summit" class="btn btn-secondary">Learn More</a>
+                </div>
             </div>
-        </div>
         </div>
     </div>
     </section>
 
+    <!-- ABOUT SECTION -->
     <section class="about-section">
     <div class="container">
         <div class="about-content">
@@ -70,8 +80,10 @@
             <h2 style="text-align: left; margin-bottom: 20px;">About Our Mission</h2>
             <p style="margin-bottom: 20px; color: #666;">Ella Rises empowers young women ages 11-18 to pursue higher education while embracing their cultural heritage. Through mariachi, ballet folklorico, and STEAM programs, we help young women see themselves as capable, college-bound, and future-focused.</p>
             <p style="margin-bottom: 20px; color: #666;">Our signature programs and annual Summit serve 150+ young women each year, building a bridge between culture and confidence, skills and opportunity, and current identity and future goals.</p>
+            <!-- About page link -->
             <a href="/about" class="btn btn-dark">More About Us</a>
         </div>
+        <!-- Supporting image -->
         <img src="/images/activities/engagement.avif" alt="Young Women">
         </div>
     </div>
@@ -94,8 +106,9 @@
       
           <p class="donate-final">¡Muchas gracias!</p>
       
+          <!-- Donation call-to-action -->
           <div class="donate-actions">
-            <a href="/donate" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Become a Sponsor Today!</a>
+            <a href="/donate" class="btn btn-primary" rel="noopener noreferrer">Become a Sponsor Today!</a>
           </div>
         </div>
     </section>
@@ -116,6 +129,7 @@
         </p>
         <p class="thankyou-subtext">Your generous contributions have lasting impact.</p>
 
+        <!-- Sponsor logos grid -->
         <div class="sponsors-grid" aria-label="Sponsors">
             <div class="sponsor-card">
             <img src="/images/sponsors/ensign.svg" alt="Ensign" loading="lazy" />
@@ -133,6 +147,7 @@
         </div>
     </section>
 
+    <!-- CONDITIONAL ERROR MESSAGE (rendered only when error_message is passed from server) -->
     <% if (error_message) { %>
     <section>
     <div class="container">
@@ -141,6 +156,7 @@
     </section>
     <% } %>
 
+    <!-- Global footer -->
     <%- include('partials/footer') %>
 </body>
 </html>
