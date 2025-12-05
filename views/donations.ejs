@@ -35,8 +35,8 @@
           <input type="text" name="q" placeholder="Search donations..." value="<%= q || '' %>">
           <button type="submit" class="btn btn-secondary">Search</button>
         </form>
-      
-        <!-- Add Event button (visible only to users with editing permissions) -->
+
+        <!-- Add Donation button (visible only to users with editing permissions) -->
         <% if (canEdit) { %>
           <button
             type="button"
@@ -45,6 +45,7 @@
           >
             Add Donation
           </button>
+        <% } %>
       </div>
 
       <!-- ADD DONATION FORM (Admin/Editor-Only) -->
@@ -52,12 +53,12 @@
       <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
         <h3 style="margin-bottom: 20px;">Add New Donation</h3>
         <form action="/donations/add" method="POST">
-          <!--Donor Email-->
+          <!-- Donor Email -->
           <div class="form-group">
             <label for="participant_email">Participant Email</label>
             <input type="email" id="participant_email" name="participant_email" required>
           </div>
-          <!--Donation Date + Donation Amount-->
+          <!-- Donation Date + Donation Amount -->
           <div class="form-row">
             <div class="form-group">
               <label for="donation_date">Donation Date</label>
@@ -79,10 +80,10 @@
           <thead>
             <tr>
               <th>Donor Name</th>
-              <th>Amount</th>
               <th>Date</th>
               <% if (canEdit) { %>
-              <th>Actions</th>
+                <th>Amount</th>
+                <th>Actions</th>
               <% } %>
             </tr>
           </thead>
@@ -90,18 +91,19 @@
             <!-- No data found -->
             <% if (donations.length === 0) { %>
             <tr>
-              <td colspan="<%= canEdit ? 4 : 3 %>" style="text-align: center; color: #666;">No donations found.</td>
+              <td colspan="<%= canEdit ? 4 : 2 %>" style="text-align: center; color: #666;">No donations found.</td>
             </tr>
             <% } else { %>
-            <!-- Render each event row -->
+            <!-- Render each donation row -->
             <% donations.forEach(donation => { %>
             <tr>
               <td><%= donation.donor %></td>
-              <td>$<%= donation.amount %></td>
               <td><%= donation.date %></td>
+
               <% if (canEdit) { %>
+                <td>$<%= Number(donation.amount || 0).toFixed(2) %></td>
                 <td class="action-buttons">
-                  <!-- EDIT BUTTON (passes event data via dataset attributes) -->
+                  <!-- EDIT BUTTON (passes donation data via dataset attributes) -->
                   <button type="button" class="btn-edit" onclick="openEditModal(this)"
                     data-participantid="<%= donation.id %>"
                     data-donationnumber="<%= donation.number %>"
@@ -121,6 +123,10 @@
         </table>
       </div>
 
+      <% if (!canEdit) { %>
+        <p style="margin-top: 12px; font-size: 0.9rem; opacity: 0.7;">
+          Donation amounts and editing options are available to managers only.
+        </p>
       <% } %>
     </div>
   </section>
@@ -161,10 +167,6 @@
 
   <!-- Modal + Table Scripts -->
   <script>
-    /**
-     * Populate modal with the selected event's data
-     * and show the modal.
-     */
     function openEditModal(button) {
       const backdrop = document.getElementById('editModalBackdrop');
       const form = document.getElementById('editDonationForm');
@@ -184,7 +186,6 @@
       document.body.style.overflow = 'hidden';
     }
 
-    /* Hide modal */
     function closeEditModal() {
       const backdrop = document.getElementById('editModalBackdrop');
       if (!backdrop) return;
@@ -192,19 +193,16 @@
       document.body.style.overflow = '';
     }
 
-    /* Close modal only when clicking outside its content */
     function backdropClose(event) {
       if (event.target.id === 'editModalBackdrop') closeEditModal();
     }
 
-    // Allow closing with ESC key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeEditModal();
     });
   </script>
 
-<!-- Global footer -->
+  <!-- Global footer -->
   <%- include('partials/footer') %>
-
 </body>
 </html>
