@@ -1,17 +1,14 @@
 // Dawson Broadbent, Ashlynn Burgess, Markus Walker
 // index.js - Express routing + auth (Admin vs Participant) + EJS + Knex (PostgreSQL)
 
+//Import libraries and packages
 require("dotenv").config();
 
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
 
-// Optional hardening (extra mile) — install first if you use them
-// const helmet = require("helmet");
-// const csrf = require("csurf");
-// const flash = require("connect-flash");
-
+//Connecting to our database
 const knex = require("knex")({
   client: "pg",
   connection: process.env.DATABASE_URL || {
@@ -24,6 +21,8 @@ const knex = require("knex")({
   },
 });
 
+
+// Setting up variables
 const app = express();
 const port = process.env.PORT || 3000;
 const host = "0.0.0.0";
@@ -52,18 +51,21 @@ app.use((req, res, next) => {
   next();
 });
 
-// ---- Helpers ----
+// Fuctions
+//Checks if user is an admin
 function isAdmin(level) {
   // Accepts admin
   if (level === undefined || level === null) return false;
   return String(level).trim().toLowerCase() === "admin";
 }
 
+//Requires the user to be logged in to continue, else redirects to the login page
 function requireAuth(req, res, next) {
   if (req.session?.isLoggedIn) return next();
   return res.redirect("/login");
 }
 
+// Requires the user to be an Admin to access
 function requireAdmin(req, res, next) {
   if (req.session?.isLoggedIn && isAdmin(req.session.level)) return next();
   return res.status(403).send("Forbidden: Admin access only.");
@@ -125,12 +127,12 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Create Account route
+// Gets the Create Account page
 app.get("/createaccount", (req, res) => {
   res.render("createaccount", { error_message: "" });
 });
 
-// Create Account route (Public)
+// Posts the Created Account
 app.post("/createaccount", async (req, res) => {
   try {
     const participantfirstname = (req.body.firstname || "").trim();
@@ -146,7 +148,7 @@ app.post("/createaccount", async (req, res) => {
     const participantzip       = (req.body.zip || "").trim() || null;
     const participantschooloremployer = (req.body.school_employer || "").trim() || null;
 
-    // Your radio values are Art / STEM / Both
+    // The radio values here are Art / STEM / Both
     const participantfieldofinterest  = (req.body.field_of_interest || "").trim();
 
     const participantrole = "participant";
@@ -165,7 +167,7 @@ app.post("/createaccount", async (req, res) => {
       });
     }
 
-    // Optional: basic field-of-interest validation
+    // Basic field-of-interest validation
     const allowedInterests = new Set(["Art", "STEM", "Both"]);
     if (!allowedInterests.has(participantfieldofinterest)) {
       return res.status(400).render("createaccount", {
@@ -200,6 +202,7 @@ app.post("/createaccount", async (req, res) => {
       participantfieldofinterest
     };
 
+    //Connects to the participant database and inserts our new object
     await knex("participant").insert(newParticipant);
 
     // After creating an account, send them to login
@@ -245,11 +248,12 @@ app.get('/programs', (req, res) => {
 
 //  Donations Data Page
 app.get("/donations", requireAuth, async (req, res) => {
-  const q = (req.query.q || "");
-
+  //Thsi is the search query and the user level
+  const q = (req.query.q || "").trim();
   const canEdit = isAdmin(req.session.level);
 
   try {
+    //Retrieves donations and names from the database tables
     const query = knex("donations as d")
       .leftJoin("participant as p", "p.participantid", "d.participantid")
       .select(
@@ -263,6 +267,7 @@ app.get("/donations", requireAuth, async (req, res) => {
       .orderBy("d.participantid", "asc")
       .orderBy("d.donationdate", "desc");
 
+    //This is the search functionality
     if (q) {
       query.where(function () {
         this.where("p.participantfirstname", "ilike", `%${q}%`)
@@ -275,15 +280,20 @@ app.get("/donations", requireAuth, async (req, res) => {
       });
     }
 
+    // Execute the built query and get all matching rows from the database
     const rows = await query;
 
+    // Transform raw DB rows into a cleaner donations array for the view
     const donations = rows.map((r) => {
+      // Format the donation date as MM/DD/YYYY for display, or blank if null
       const formattedDate = r.donationdate
         ? new Date(r.donationdate).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })
         : "";
 
+      // Format the donation date as MM/DD/YYYY for display, or blank if null
       const donorFullName = [r.participantfirstname, r.participantlastname].filter(Boolean).join(" ").trim() || "(Unknown donor)";
 
+      // Format the donation date as MM/DD/YYYY for display, or blank if null
       return {
         date: formattedDate,
         amount: r.donationamount,
@@ -295,6 +305,7 @@ app.get("/donations", requireAuth, async (req, res) => {
       };
     });
 
+    //Renders the donations page again
     res.render("donations", {
       donations,
       q,
@@ -302,6 +313,8 @@ app.get("/donations", requireAuth, async (req, res) => {
       isPublic: false,   // no longer used, but safe
       error_message: "",
     });
+
+  //Error Handling
   } catch (err) {
     res.render("donations", {
       donations: [],
@@ -316,7 +329,9 @@ app.get("/donations", requireAuth, async (req, res) => {
 // Add donation route
 app.post("/donations/add", async (req, res) => {
   try {
+    // Look up an existing participant by the email provided in the donation form
     let participantResult = await knex("participant").select("participantid").where({"participantemail": req.body.participant_email}).first();
+    // If no participant exists, create a minimal participant record and look it up again
     if (!participantResult) {
       let participantfirstname = req.body.firstname;
       let participantlastname = req.body.lastname;
@@ -326,9 +341,13 @@ app.post("/donations/add", async (req, res) => {
       await knex("participant").insert(newParticipant);
       participantResult = await knex("participant").select("participantid").where({"participantemail": req.body.participant_email}).first();
     };
+
+    // Use the participant's ID to tie this donation to them
     let participantid = participantResult.participantid;
     let donationamount = req.body.amount;
     let donationdate = new Date();
+
+    // Find the last donation number for this participant to increment it (1, 2, 3, ...)
     let lastdonation = await knex("donations").where({"participantid": participantid}).max("donationnumber as max").first();
     let donationnumber;
     if (!lastdonation || lastdonation.max === null) {
@@ -336,16 +355,20 @@ app.post("/donations/add", async (req, res) => {
     } else {
       donationnumber = lastdonation.max + 1;
     };
+
+    // New donation record linked to participant
     const newDonation = {participantid, donationnumber, donationdate, donationamount};
 
     await knex("donations").insert(newDonation);
+
+    // If a staff member is logged in, go back to donations admin page; otherwise send public donor home
     if (req.session.isLoggedIn) {
       return res.redirect("/donations");
     } else {
       return res.redirect("/");
     }
   } catch (err) {
-    // Render the same donations view with error
+    // On error, re-render the public donations page with an error message
     return res.render("donations", {
       donations: [],
       q: "",
@@ -359,12 +382,15 @@ app.post("/donations/add", async (req, res) => {
 // Edit donation route
 app.post("/donations/:participantid/:donationnumber/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
+    // Sets variables for the selected donation to edit
     const participantid = req.params.participantid;
     const donationnumber = req.params.donationnumber;
 
+    // The edited information
     const amount = req.body.amount;
     const donation_date = req.body.donation_date; // YYYY-MM-DD from input[type="date"]
 
+    // Connects to the DB and updates with the edited information
     const updated = await knex("donations")
       .where({ participantid })
       .andWhere({ donationnumber })
@@ -373,8 +399,11 @@ app.post("/donations/:participantid/:donationnumber/edit", requireAuth, requireA
         donationdate: donation_date,
       });
 
+    //Logs how many rows are updated and redirects back to donations
     console.log("Donations rows updated:", updated);
     res.redirect("/donations");
+
+  // Error Handling
   } catch (err) {
     console.error("Edit donation error:", err);
     res.redirect("/donations?error=Edit%20failed");
@@ -384,8 +413,10 @@ app.post("/donations/:participantid/:donationnumber/edit", requireAuth, requireA
 // Delete donation route
 app.post("/donations/:participantid/:donationnumber/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
+    // Deletes the selected donation and reroutes back to the donations page
     await knex("donations").where({ "participantid": req.params.participantid }).andWhere({ "donationnumber": req.params.donationnumber }).del();
     res.redirect("/donations");
+  //Error handling
   } catch (err) {
     res.status(500).send(err.message);
   }
