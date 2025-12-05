@@ -10,8 +10,10 @@
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
+  <!-- Global navigation/header -->
   <%- include('partials/header') %>
 
+  <!-- Page Header -->
   <div class="page-header">
     <div class="container">
       <h1>Support Our Mission</h1>
@@ -21,16 +23,20 @@
 
   <section class="content-section">
     <div class="container">
+      <!-- Display server-side error messages -->
       <% if (error_message) { %>
       <div class="alert alert-error"><%= error_message %></div>
       <% } %>
 
+      <!-- Search + Add Button -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+        <!-- Search form (persists value using "q") -->
         <form action="/donations" method="GET" class="search-box" style="margin-bottom: 0;">
           <input type="text" name="q" placeholder="Search donations..." value="<%= q || '' %>">
           <button type="submit" class="btn btn-secondary">Search</button>
         </form>
       
+        <!-- Add Event button (visible only to users with editing permissions) -->
         <% if (canEdit) { %>
           <button
             type="button"
@@ -41,14 +47,17 @@
           </button>
       </div>
 
+      <!-- ADD DONATION FORM (Admin/Editor-Only) -->
       <% if (canEdit) { %>
       <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
         <h3 style="margin-bottom: 20px;">Add New Donation</h3>
         <form action="/donations/add" method="POST">
+          <!--Donor Email-->
           <div class="form-group">
             <label for="participant_email">Participant Email</label>
             <input type="email" id="participant_email" name="participant_email" required>
           </div>
+          <!--Donation Date + Donation Amount-->
           <div class="form-row">
             <div class="form-group">
               <label for="donation_date">Donation Date</label>
@@ -64,7 +73,7 @@
       </div>
       <% } %>
 
-      <!-- ✅ Scrollable table container (sticky header) -->
+      <!-- DONATIONS TABLE (scrollable, sticky header) -->
       <div class="table-scroll" role="region" aria-label="Donation records table" tabindex="0">
         <table class="sticky-table">
           <thead>
@@ -78,11 +87,13 @@
             </tr>
           </thead>
           <tbody>
+            <!-- No data found -->
             <% if (donations.length === 0) { %>
             <tr>
               <td colspan="<%= canEdit ? 4 : 3 %>" style="text-align: center; color: #666;">No donations found.</td>
             </tr>
             <% } else { %>
+            <!-- Render each event row -->
             <% donations.forEach(donation => { %>
             <tr>
               <td><%= donation.donor %></td>
@@ -90,12 +101,14 @@
               <td><%= donation.date %></td>
               <% if (canEdit) { %>
                 <td class="action-buttons">
+                  <!-- EDIT BUTTON (passes event data via dataset attributes) -->
                   <button type="button" class="btn-edit" onclick="openEditModal(this)"
                     data-participantid="<%= donation.id %>"
                     data-donationnumber="<%= donation.number %>"
                     data-amount="<%= donation.amount %>"
                     data-date="<%= donation.isoDate %>"
                   >Edit</button>
+                  <!-- DELETE BUTTON (confirmation prompt) -->
                   <form action="/donations/<%= donation.id %>/<%= donation.number %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this donation?')">
                     <button type="submit" class="btn-delete">Delete</button>
                   </form>
@@ -112,17 +125,19 @@
     </div>
   </section>
 
-  <!-- ✅ Edit Modal -->
+  <!-- EDIT MODAL (Admin/Editor only) -->
   <% if (canEdit) { %>
     <div id="editModalBackdrop" class="modal-backdrop" onclick="backdropClose(event)">
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" onclick="event.stopPropagation()">
+        <!-- Modal Header -->
         <div class="modal-header">
           <h3 id="editModalTitle">Edit Donation</h3>
           <button class="modal-close" type="button" onclick="closeEditModal()" aria-label="Close">×</button>
         </div>
-
+        <!-- Modal Body -->
         <div class="modal-body">
           <form id="editDonationForm" method="POST">
+            <!-- Amount + Date -->
             <div class="form-row">
               <div class="form-group">
                 <label for="edit_amount">Amount ($)</label>
@@ -133,7 +148,7 @@
                 <input type="date" id="edit_donation_date" name="donation_date" required>
               </div>
             </div>
-
+            <!-- Modal Footer Buttons -->
             <div class="modal-actions">
               <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
               <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -144,7 +159,12 @@
     </div>
   <% } %>
 
+  <!-- Modal + Table Scripts -->
   <script>
+    /**
+     * Populate modal with the selected event's data
+     * and show the modal.
+     */
     function openEditModal(button) {
       const backdrop = document.getElementById('editModalBackdrop');
       const form = document.getElementById('editDonationForm');
@@ -164,6 +184,7 @@
       document.body.style.overflow = 'hidden';
     }
 
+    /* Hide modal */
     function closeEditModal() {
       const backdrop = document.getElementById('editModalBackdrop');
       if (!backdrop) return;
@@ -171,15 +192,18 @@
       document.body.style.overflow = '';
     }
 
+    /* Close modal only when clicking outside its content */
     function backdropClose(event) {
       if (event.target.id === 'editModalBackdrop') closeEditModal();
     }
 
+    // Allow closing with ESC key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeEditModal();
     });
   </script>
 
+<!-- Global footer -->
   <%- include('partials/footer') %>
 
 </body>

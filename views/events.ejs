@@ -10,8 +10,10 @@
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
+  <!-- Global navigation/header -->
   <%- include('partials/header') %>
 
+  <!-- Page title + subtitle -->
   <div class="page-header">
     <div class="container">
       <h1>Events</h1>
@@ -21,24 +23,30 @@
 
   <section class="content-section">
     <div class="container">
+      <!-- Display server-side error messages -->
       <% if (error_message) { %>
       <div class="alert alert-error"><%= error_message %></div>
       <% } %>
 
+      <!-- SEARCH BAR + ADD-EVENT BUTTON ROW -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+        <!-- Search form (persists value using "q") -->
         <form action="/events" method="GET" class="search-box" style="margin-bottom: 0;">
           <input type="text" name="q" placeholder="Search events..." value="<%= q || '' %>">
           <button type="submit" class="btn btn-secondary">Search</button>
         </form>
+        <!-- Add Event button (visible only to users with editing permissions) -->
         <% if (canEdit) { %>
         <button type="button" class="btn btn-primary" onclick="document.getElementById('addForm').style.display = document.getElementById('addForm').style.display === 'none' ? 'block' : 'none'">Add Event</button>
         <% } %>
       </div>
 
+      <!-- ADD EVENT FORM (Admin/Editor-Only) -->
       <% if (canEdit) { %>
       <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
         <h3 style="margin-bottom: 20px;">Add New Event</h3>
         <form action="/events/add" method="POST">
+          <!-- Event name from defined templates -->
           <div class="form-group">
             <label for="event_name">Event Name</label>
             <select id="event_name" name="event_name" required>
@@ -48,6 +56,7 @@
               <% }); %>
             </select>
           </div>
+          <!-- Start + End datetime inputs -->
           <div class="form-row">
             <div class="form-group">
               <label for="eventdatetimestart">Start Date and Time</label>
@@ -58,6 +67,7 @@
               <input type="datetime-local" id="eventdatetimeend" name="eventdatetimeend" required>
             </div>
           </div>
+          <!-- Location dropdown populated from database -->
           <div class="form-group">
             <label for="eventlocation">Location</label>
             <select id="eventlocation" name="eventlocation">
@@ -67,17 +77,18 @@
               <% }); %>
             </select>
           </div>
-            <div class="form-group">
-              <label for="eventregistrationdeadline">Registration Deadline</label>
-              <input type="datetime-local" id="eventregistrationdeadline" name="eventregistrationdeadline" required>
-            </div>
+          <!-- Registration deadline -->
+          <div class="form-group">
+            <label for="eventregistrationdeadline">Registration Deadline</label>
+            <input type="datetime-local" id="eventregistrationdeadline" name="eventregistrationdeadline" required>
+          </div>
         
-            <button type="submit" class="btn btn-primary">Add Event</button>
-          </form>
+          <button type="submit" class="btn btn-primary">Add Event</button>
+        </form>
         </div>
       <% } %>
 
-      <!-- ✅ Scrollable table container (sticky header) -->
+      <!-- EVENTS TABLE (scrollable, sticky header) -->
       <div class="table-scroll" role="region" aria-label="Events table" tabindex="0">
         <table class="sticky-table">
           <thead>
@@ -91,16 +102,19 @@
             </tr>
           </thead>
           <tbody>
+            <!-- No data found -->
             <% if (events.length === 0) { %>
             <tr>
               <td colspan="<%= canEdit ? 6 : 5 %>" style="text-align: center; color: #666;">No events found.</td>
             </tr>
             <% } else { %>
 
+            <!-- Render each event row -->
             <% events.forEach(e => { %>
             <tr>
               <td><%= e.eventname %></td>
 
+              <!-- Convert ISO timestamps to readable U.S. format -->
               <td><%= e.eventdatetimestart ? new Date(e.eventdatetimestart).toLocaleString('en-US', {
                 year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
               }) : 'TBD' %></td>
@@ -118,7 +132,7 @@
               <% if (canEdit) { %>
               <td class="action-buttons">
 
-                <!-- ✅ Edit button with data attributes -->
+                <!-- EDIT BUTTON (passes event data via dataset attributes) -->
                 <button
                   type="button"
                   class="btn-edit"
@@ -133,7 +147,7 @@
                   Edit
                 </button>
 
-                <!-- ✅ Delete -->
+                <!-- DELETE BUTTON (confirmation prompt) -->
                 <form action="/events/<%= e.eventid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this event?')">
                   <button type="submit" class="btn-delete">Delete</button>
                 </form>
@@ -150,16 +164,19 @@
     </div>
   </section>
 
-  <!-- ✅ Edit Modal -->
+  <!-- EDIT MODAL (Admin/Editor only) -->
   <% if (canEdit) { %>
     <div id="editModalBackdrop" class="modal-backdrop" onclick="backdropClose(event)">
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" onclick="event.stopPropagation()">
+        <!-- Modal Header -->
         <div class="modal-header">
           <h3 id="editModalTitle">Edit Event</h3>
           <button class="modal-close" type="button" onclick="closeEditModal()" aria-label="Close">×</button>
         </div>
+        <!-- Modal Body -->
         <div class="modal-body">
           <form id="editEventForm" method="POST">
+            <!-- Event Name -->
             <div class="form-group">
               <label for="edit_eventname">Event Name</label>
               <select id="edit_eventname" name="eventname" required>
@@ -169,6 +186,7 @@
                 <% }); %>
               </select>
             </div>
+            <!-- Start + End -->
             <div class="form-row">
               <div class="form-group">
                 <label for="edit_start">Start Date and Time</label>
@@ -180,6 +198,7 @@
               </div>
             </div>
   
+            <!-- Location + Deadline -->
             <div class="form-row">
               <div class="form-group">
                 <label for="edit_location">Location</label>
@@ -196,6 +215,7 @@
               </div>
             </div>
   
+            <!-- Modal Footer Buttons -->
             <div class="modal-actions">
               <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
               <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -206,7 +226,12 @@
     </div>
   <% } %>
     
+  <!-- Modal + Table Scripts -->
   <script>
+    /**
+     * Converts an ISO timestamp into yyyy-MM-ddTHH:mm
+     * required by <input type="datetime-local">
+     */
     function toDatetimeLocal(isoString) {
       if (!isoString) return '';
       const d = new Date(isoString);
@@ -214,6 +239,10 @@
       return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
+    /**
+     * Populate modal with the selected event's data
+     * and show the modal.
+     */
     function openEditModal(button) {
       const backdrop = document.getElementById('editModalBackdrop');
       const form = document.getElementById('editEventForm');
@@ -229,6 +258,7 @@
 
       form.action = `/events/${eventid}/edit`;
 
+      // Load values from the row's dataset attributes
       document.getElementById('edit_eventname').value = eventname || '';
       document.getElementById('edit_start').value = toDatetimeLocal(start);
       document.getElementById('edit_end').value = toDatetimeLocal(end);
@@ -239,6 +269,7 @@
       document.body.style.overflow = 'hidden';
     }
 
+    /* Hide modal */
     function closeEditModal() {
       const backdrop = document.getElementById('editModalBackdrop');
       if (!backdrop) return;
@@ -246,6 +277,7 @@
       document.body.style.overflow = '';
     }
 
+    /* Close modal only when clicking outside its content */
     function backdropClose(event) {
       // Only close if clicking the backdrop itself, not the modal content
       if (event.target.id === 'editModalBackdrop') {
@@ -253,6 +285,7 @@
       }
     }
 
+    // Allow closing with ESC key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeEditModal();
     });
@@ -262,6 +295,7 @@
     });
   </script>
 
+  <!-- Global footer -->
   <%- include('partials/footer') %>
 </body>
 </html>
