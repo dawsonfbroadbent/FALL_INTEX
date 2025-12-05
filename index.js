@@ -141,76 +141,6 @@ app.get("/about", (req, res) => {
   res.render("about", { error_message: "" });
 });
 
-// ---- Public Donations Page (accessible to ANY visitor) ----
-app.get("/donations", async (req, res) => {
-  try {
-    // Get search query from URL parameters
-    const searchQuery = req.query.q || "";
-
-    // Create donations array and fill with donation info from database if user is logged in
-    let donations = [];
-    let all = [];
-    if (req.session?.isLoggedIn) {
-      all = await knex("donations").orderBy("participantid");
-    }
-
-    // Create donation object and push to donations array
-    for (let iCount = 0; iCount < all.length; iCount++) {
-      let donationDate = all[iCount].donationdate;
-      let formattedDate;
-      if (!donationDate) {
-        formattedDate = ""
-      } else {
-        formattedDate = new Date(donationDate).toLocaleDateString("en-US", {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        });
-      };
-      let donationAmount = all[iCount].donationamount;
-      let donor = await knex("participant").select("participantfirstname", "participantlastname").where({"participantid": all[iCount].participantid}).first();
-      let donorFullName = donor.participantfirstname + " " + donor.participantlastname;
-      
-      donations.push({
-        date: formattedDate,
-        amount: donationAmount,
-        donor: donorFullName,
-        id: all[iCount].participantid,
-        number: all[iCount].donationnumber
-      });
-    };
-
-    // Filter donations based on search query
-    if (searchQuery) {
-      const lowerQuery = searchQuery.toLowerCase();
-      donations = donations.filter(donation => {
-        return (
-          donation.donor.toLowerCase().includes(lowerQuery) ||
-          donation.amount.toString().includes(lowerQuery) ||
-          donation.date.includes(searchQuery)
-        );
-      });
-    }
-
-    // Render donations page with permissions based on user logged in status and level
-    res.render("donations", {
-      donations,
-      isPublic: !req.session?.isLoggedIn,
-      canEdit: req.session?.isLoggedIn && isAdmin(req.session.level),
-      error_message: "",
-      q: searchQuery
-    });
-  } catch (err) {
-    // If error is caught, render donations page with error message
-    res.render("donations", {
-      donations: [],
-      isPublic: !req.session?.isLoggedIn,
-      canEdit: req.session?.isLoggedIn && isAdmin(req.session.level),
-      error_message: err.message,
-      q: req.query.q || ""
-    });
-  }
-});
 
 // Contact page route
 app.get('/contact', (req, res) => {
@@ -225,6 +155,76 @@ app.get('/programs', (req, res) => {
   res.render('programs', {
     // session: req.session || {}
   });
+});
+
+//  Donations Data Page
+app.get("/donations", requireAuth, async (req, res) => {
+  const q = (req.query.q || "").trim();
+
+  const canEdit = isAdmin(req.session.level);
+
+  try {
+    const query = knex("donations as d")
+      .leftJoin("participant as p", "p.participantid", "d.participantid")
+      .select(
+        "d.participantid",
+        "d.donationnumber",
+        "d.donationdate",
+        "d.donationamount",
+        "p.participantfirstname",
+        "p.participantlastname"
+      )
+      .orderBy("d.participantid", "asc")
+      .orderBy("d.donationdate", "desc");
+
+    if (q) {
+      query.where(function () {
+        this.where("p.participantfirstname", "ilike", `%${q}%`)
+          .orWhere("p.participantlastname", "ilike", `%${q}%`)
+          .orWhereRaw(`concat(p.participantfirstname, ' ', p.participantlastname) ilike ?`, [`%${q}%`])
+          .orWhereRaw(`d.donationamount::text ilike ?`, [`%${q}%`])
+          .orWhereRaw(`d.donationnumber::text ilike ?`, [`%${q}%`])
+          .orWhereRaw(`d.participantid::text ilike ?`, [`%${q}%`])
+          .orWhereRaw(`to_char(d.donationdate, 'MM/DD/YYYY') ilike ?`, [`%${q}%`]);
+      });
+    }
+
+    const rows = await query;
+
+    const donations = rows.map((r) => {
+      const formattedDate = r.donationdate
+        ? new Date(r.donationdate).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })
+        : "";
+
+      const donorFullName = [r.participantfirstname, r.participantlastname].filter(Boolean).join(" ").trim() || "(Unknown donor)";
+
+      return {
+        date: formattedDate,
+        amount: r.donationamount,
+        donor: donorFullName,
+        id: r.participantid,
+        number: r.donationnumber,
+        // keep raw date for edit modal (date-only string)
+        isoDate: r.donationdate ? new Date(r.donationdate).toISOString().slice(0, 10) : "",
+      };
+    });
+
+    res.render("donations", {
+      donations,
+      q,
+      canEdit,
+      isPublic: false,   // no longer used, but safe
+      error_message: "",
+    });
+  } catch (err) {
+    res.render("donations", {
+      donations: [],
+      q,
+      canEdit: isAdmin(req.session.level),
+      isPublic: false,
+      error_message: err.message,
+    });
+  }
 });
 
 // Add donation route
@@ -269,6 +269,7 @@ app.post("/donations/:participantid/:donationnumber/delete", requireAuth, requir
   }
 });
 
+// Get participants route
 app.get("/participants", requireAuth, async (req, res) => {
   const q = (req.query.q || "").trim();
 
