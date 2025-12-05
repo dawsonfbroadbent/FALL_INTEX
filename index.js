@@ -74,9 +74,9 @@ app.get("/", async (req, res) => {
   res.render("index", { error_message: "" });
 });
 
-// dashboard route
-app.get('/dashboard', (req, res) => {
-    res.render('dashboard');
+//Dashboard Route
+app.get("/dashboard", requireAuth, (req, res) => {
+  res.render("dashboard", { session: req.session });
 });
 
 // Login page route
