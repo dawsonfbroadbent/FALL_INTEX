@@ -74,10 +74,9 @@ app.get("/", async (req, res) => {
   res.render("index", { error_message: "" });
 });
 
-// Optional: separate internal dashboard route (if you want it)
-app.get("/dashboard", requireAuth, async (req, res) => {
-  // Reuse index.ejs if you want, or create dashboard.ejs later
-  return res.redirect("/");
+// dashboard route
+app.get('/dashboard', (req, res) => {
+    res.render('dashboard');
 });
 
 // Login page route
