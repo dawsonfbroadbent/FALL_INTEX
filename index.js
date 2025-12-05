@@ -259,6 +259,31 @@ app.post("/donations/add", async (req, res) => {
   }
 });
 
+// Edit donation route
+app.post("/donations/:participantid/:donationnumber/edit", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const participantid = req.params.participantid;
+    const donationnumber = req.params.donationnumber;
+
+    const amount = req.body.amount;
+    const donation_date = req.body.donation_date; // YYYY-MM-DD from input[type="date"]
+
+    const updated = await knex("donations")
+      .where({ participantid })
+      .andWhere({ donationnumber })
+      .update({
+        donationamount: amount,
+        donationdate: donation_date,
+      });
+
+    console.log("Donations rows updated:", updated);
+    res.redirect("/donations");
+  } catch (err) {
+    console.error("Edit donation error:", err);
+    res.redirect("/donations?error=Edit%20failed");
+  }
+});
+
 // Delete donation route
 app.post("/donations/:participantid/:donationnumber/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
