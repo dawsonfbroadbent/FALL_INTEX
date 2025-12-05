@@ -3,16 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Donate</title>
+    <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
+  <%- include('partials/header') %>
     <div class="donate-form card">
         <h2 style="margin-bottom: 30px; text-align: center;">Make a Donation</h2>
         
         <form action="/donations/add" method="POST">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstname">First Name</label>
+              <input type="text" id="firstname" name="firstname" required>
+            </div>
+            <div class="form-group">
+              <label for="lastname">Last Name</label>
+              <input type="text" id="lastname" name="lastname" required>
+            </div>
+          </div>
           <div class="form-group">
-            <label for="donor_email">Donor Email Address</label>
-            <input type="email" id="donor_email" name="donor_email" required>
+            <label for="participant_email">Email Address</label>
+            <input type="email" id="participant_email" name="participant_email" required>
           </div>
           
           <div class="form-group">
@@ -30,13 +42,16 @@
             <input type="number" id="amount" name="amount" min="1" step="0.01" required>
           </div>
           
-          <div class="form-group">
-            <label for="donation_date">Date</label>
-            <input type="date" id="donation_date" name="donation_date" value="<%= new Date().toISOString().split('T')[0] %>">
-          </div>
-          
           <button type="submit" class="btn btn-primary" style="width: 100%;">Donate Now</button>
         </form>
       </div>
+  <%- include('partials/footer') %>
+  <script>
+    function setAmount(value) {
+      document.getElementById('amount').value = value;
+      document.querySelectorAll('.donation-amounts button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+  </script>
 </body>
 </html>

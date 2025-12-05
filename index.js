@@ -133,7 +133,7 @@ app.get("/logout", (req, res) => {
 
 // Donation page route
 app.get("/donate", (req, res) => {
-  res.redirect(302, "https://givebutter.com/EllaRises"); // Build new page and redirect to it rather than use external page
+  res.render('donate.ejs', { error_message: "" }); // Build new page and redirect to it rather than use external page
 });
 
 // About page route
@@ -232,7 +232,12 @@ app.post("/donations/add", async (req, res) => {
   try {
     let participantResult = await knex("participant").select("participantid").where({"participantemail": req.body.participant_email}).first();
     if (!participantResult) {
-      return res.status(404).send("Participant not found with that email");
+      let participantfirstname = req.body.firstname;
+      let participantlastname = req.body.lastname;
+      let participantemail = req.body.participant_email;
+      let newParticipant = {participantfirstname, participantlastname, participantemail};
+      await knex("participant").insert(newParticipant);
+      participantResult = await knex("participant").select("participantid").where({"participantemail": req.body.participant_email}).first();
     };
     let participantid = participantResult.participantid;
     let donationamount = req.body.amount;
@@ -247,7 +252,11 @@ app.post("/donations/add", async (req, res) => {
     const newDonation = {participantid, donationnumber, donationdate, donationamount};
 
     await knex("donations").insert(newDonation);
-    return res.redirect("/donations");
+    if (req.session.isLoggedIn) {
+      return res.redirect("/donations");
+    } else {
+      return res.redirect("/");
+    }
   } catch (err) {
     // Render the same donations view with error
     return res.render("donations", {
