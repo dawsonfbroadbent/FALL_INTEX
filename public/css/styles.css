@@ -1322,3 +1322,118 @@ tr:hover {
   outline:3px solid rgba(242,198,198,0.6);
   outline-offset:2px;
 }
+
+/* ================================
+   CREATE ACCOUNT PAGE (SCOPED)
+   Nothing here overrides global form styles
+   ================================ */
+
+   .create-account-page .ca-wrap {
+    min-height: calc(100vh - 160px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+  
+  .create-account-page .ca-card {
+    width: 100%;
+    max-width: 760px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 18px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  
+  .create-account-page .ca-hero {
+    background: #F2C6C6; /* site blush */
+    padding: 26px 26px 22px;
+  }
+  
+  .create-account-page .ca-hero h1 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: 0.2px;
+    color: #111;
+  }
+  
+  .create-account-page .ca-hero p {
+    margin: 8px 0 0;
+    opacity: 0.85;
+    color: #111;
+    font-weight: 600;
+  }
+  
+  .create-account-page .ca-body {
+    padding: 26px;
+  }
+  
+  /* Helper row under CTA */
+  .create-account-page .ca-helper-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    font-size: 13px;
+    opacity: 0.85;
+  }
+  
+  /* "Login" link styled like a subtle button-link */
+  .create-account-page .ca-link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-weight: 800;
+    text-decoration: underline;
+    cursor: pointer;
+    color: inherit;
+  }
+  
+  /* Small hint text under some fields */
+  .create-account-page .ca-hint {
+    margin-top: 6px;
+    font-size: 12px;
+    opacity: 0.75;
+    line-height: 1.35;
+  }
+  
+  /* Full width CTA button without touching .btn globally */
+  .create-account-page .btn.ca-btn-wide {
+    width: 100%;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+  }
+  
+  /* Tiny disclaimer at bottom */
+  .create-account-page .ca-small-note {
+    margin-top: 12px;
+    font-size: 12px;
+    opacity: 0.7;
+    text-align: center;
+    line-height: 1.35;
+  }
+  
+  /* Password match message */
+  .create-account-page .ca-password-match {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    display: none;
+  }
+  
+  .create-account-page .ca-password-match.ok { color: #137333; }
+  .create-account-page .ca-password-match.bad { color: #b3261e; }
+  
+  /* Optional: a slightly fancier focus ring ONLY for inputs inside create account page.
+     This does not change borders/radius — just adds a ring on focus. */
+  .create-account-page input:focus,
+  .create-account-page select:focus,
+  .create-account-page textarea:focus {
+    box-shadow: 0 0 0 4px rgba(242, 198, 198, 0.35);
+  }

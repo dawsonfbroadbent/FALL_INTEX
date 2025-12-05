@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account - Ella Rises</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body class="create-account-page">
+  <%- include('partials/header') %>
+
+  <div class="ca-wrap">
+    <div class="ca-card">
+      <div class="ca-hero">
+        <h1>Create Your Account</h1>
+        <p>Join Ella Rises to participate in programs, events, and updates.</p>
+      </div>
+
+      <div class="ca-body">
+        <% if (error_message) { %>
+          <div class="alert alert-error"><%= error_message %></div>
+        <% } %>
+
+        <form action="/createaccount" method="POST" id="createAccountForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstname">First Name</label>
+              <input type="text" id="firstname" name="firstname" autocomplete="given-name" required />
+            </div>
+            <div class="form-group">
+              <label for="lastname">Last Name</label>
+              <input type="text" id="lastname" name="lastname" autocomplete="family-name" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" autocomplete="email" required />
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" autocomplete="new-password" required />
+              <div class="ca-hint">Use at least 8 characters if possible (mix letters + numbers).</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="confirm_password">Confirm Password</label>
+              <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required />
+              <div id="pwMatchMsg" class="ca-password-match"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="dob">Date of Birth</label>
+              <input type="date" id="dob" name="dob" />
+              <div class="ca-hint">Optional</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" name="phone" autocomplete="tel" />
+              <div class="ca-hint">Optional</div>
+            </div>
+
+            <div class="form-group">
+              <label for="state">State</label>
+              <input type="text" id="state" name="state" maxlength="2" placeholder="e.g., CA" autocomplete="address-level1" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="zip">Zip Code</label>
+              <input type="text" id="zip" name="zip" maxlength="10" autocomplete="postal-code" />
+            </div>
+
+            <div class="form-group">
+              <label for="school_employer">School or Employer</label>
+              <input type="text" id="school_employer" name="school_employer" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Field of Interest</label>
+            <div class="interest-options" role="radiogroup" aria-label="Field of Interest">
+              <input type="radio" id="art" name="field_of_interest" value="Art" required>
+              <label for="art" class="interest-pill">Art</label>
+
+              <input type="radio" id="stem" name="field_of_interest" value="STEM" required>
+              <label for="stem" class="interest-pill">STEM</label>
+
+              <input type="radio" id="both" name="field_of_interest" value="Both" required>
+              <label for="both" class="interest-pill">Both</label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary ca-btn-wide" id="submitBtn">
+            Create Account
+          </button>
+
+          <div class="ca-helper-row">
+            <span>Already have an account?</span>
+            <a href="/login" class="ca-link-btn">Login</a>
+          </div>
+
+          <div class="ca-small-note">
+            By creating an account, you agree to be contacted about program updates. We’ll never share your information.
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    // Confirm password (client-side) — still validate on server too
+    (function () {
+      const form = document.getElementById("createAccountForm");
+      const pw = document.getElementById("password");
+      const cpw = document.getElementById("confirm_password");
+      const msg = document.getElementById("pwMatchMsg");
+
+      function checkMatch() {
+        const p = pw.value || "";
+        const c = cpw.value || "";
+
+        if (!p && !c) {
+          msg.style.display = "none";
+          msg.textContent = "";
+          msg.className = "ca-password-match";
+          cpw.setCustomValidity("");
+          return;
+        }
+
+        msg.style.display = "block";
+
+        if (p === c) {
+          msg.textContent = "Passwords match.";
+          msg.className = "ca-password-match ok";
+          cpw.setCustomValidity("");
+        } else {
+          msg.textContent = "Passwords do not match.";
+          msg.className = "ca-password-match bad";
+          cpw.setCustomValidity("Passwords do not match");
+        }
+      }
+
+      pw.addEventListener("input", checkMatch);
+      cpw.addEventListener("input", checkMatch);
+
+      form.addEventListener("submit", function (e) {
+        checkMatch();
+        if (!form.checkValidity()) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

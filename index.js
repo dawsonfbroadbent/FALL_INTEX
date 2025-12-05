@@ -126,6 +126,93 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// Create Account route
+app.get("/createaccount", (req, res) => {
+  res.render("createaccount", { error_message: "" });
+});
+
+// Create Account route (Public)
+app.post("/createaccount", async (req, res) => {
+  try {
+    const participantfirstname = (req.body.firstname || "").trim();
+    const participantlastname  = (req.body.lastname || "").trim();
+    const participantemail     = (req.body.email || "").trim().toLowerCase();
+    const password             = (req.body.password || "").trim();
+    const confirmPassword      = (req.body.confirm_password || "").trim();
+
+    const participantdob       = req.body.dob || null;
+    const participantphone     = (req.body.phone || "").trim() || null;
+    const participantcity      = (req.body.city || "").trim() || null; // only if you add city field later
+    const participantstate     = (req.body.state || "").trim().toUpperCase() || null;
+    const participantzip       = (req.body.zip || "").trim() || null;
+    const participantschooloremployer = (req.body.school_employer || "").trim() || null;
+
+    // Your radio values are Art / STEM / Both
+    const participantfieldofinterest  = (req.body.field_of_interest || "").trim();
+
+    const participantrole = "participant";
+
+    // Basic required checks
+    if (!participantfirstname || !participantlastname || !participantemail || !password) {
+      return res.status(400).render("createaccount", {
+        error_message: "Please fill out all required fields."
+      });
+    }
+
+    // Confirm password check
+    if (password !== confirmPassword) {
+      return res.status(400).render("createaccount", {
+        error_message: "Passwords do not match. Please try again."
+      });
+    }
+
+    // Optional: basic field-of-interest validation
+    const allowedInterests = new Set(["Art", "STEM", "Both"]);
+    if (!allowedInterests.has(participantfieldofinterest)) {
+      return res.status(400).render("createaccount", {
+        error_message: "Please select a valid field of interest."
+      });
+    }
+
+    // Prevent duplicate email
+    const existing = await knex("participant")
+      .where({ participantemail })
+      .first();
+
+    if (existing) {
+      return res.status(409).render("createaccount", {
+        error_message: "An account with that email already exists. Try logging in."
+      });
+    }
+
+    // Build insert object (include only columns that exist in your table)
+    const newParticipant = {
+      participantemail,
+      password, // NOTE: consider hashing later
+      participantfirstname,
+      participantlastname,
+      participantdob,
+      participantrole,
+      participantphone,
+      participantcity,
+      participantstate,
+      participantzip,
+      participantschooloremployer,
+      participantfieldofinterest
+    };
+
+    await knex("participant").insert(newParticipant);
+
+    // After creating an account, send them to login
+    return res.redirect("/login");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).render("createaccount", {
+      error_message: "Something went wrong creating your account. Please try again."
+    });
+  }
+});
+
 // Logout route
 app.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/"));
