@@ -24,11 +24,11 @@
         <% if (error_message) { %>
         <div class="alert alert-error"><%= error_message %></div>
         <% } %>
-
+            <!-- wrapper card for the contact form -->
         <div class="card" style="max-width: 760px; margin: 0 auto;">
         <h2 style="margin-bottom: 20px;">Get In Touch</h2>
         <h4 style="margin-bottom: 20px; text-align: center;">(Not Yet Functional, See Note Below)</h4>
-
+<!-- form post target is ready for backend logic when enabled -->
         <form action="/contact" method="POST">
             <div class="form-group">
             <label for="name">Your Name</label>
@@ -39,7 +39,7 @@
             <label for="email">Email Address</label>
             <input type="email" id="email" name="email" required />
             </div>
-
+            <!-- dropdown used to help categorize incoming messages -->
             <div class="form-group">
             <label for="topic">What are you reaching out about?</label>
             <select id="topic" name="topic" required>
@@ -60,7 +60,7 @@
         </div>
     </div>
     </section>
-
+     <!-- this section explains future email integration using nodemailer -->
     <div class="card" style="max-width: 760px; margin: 0px auto 0;">
         <h3 style="margin: 0 0 0px; color: #F1A6A0;">Functionality Note</h3>
         <p class="muted" style="margin: 0; font-size: 14px; line-height: 1.6; color: #333; opacity: 0.9;">

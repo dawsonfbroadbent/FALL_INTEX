@@ -70,9 +70,11 @@
     } else {
       vizElement.style.height = "1427px";
     }
-
+    // load tableau's embed script dynamically
     var scriptElement = document.createElement("script");
+    // tableau public api for rendering the viz
     scriptElement.src = "https://public.tableau.com/javascripts/api/viz_v1.js";
+    // attach the script right before the viz object so tableau can initialize -->
     vizElement.parentNode.insertBefore(scriptElement, vizElement);
   </script>
 
