@@ -318,7 +318,7 @@ app.get("/donations", requireAuth, async (req, res) => {
   } catch (err) {
     res.render("donations", {
       donations: [],
-      q,
+      q: "",
       canEdit: isAdmin(req.session.level),
       isPublic: false,
       error_message: err.message,
@@ -336,7 +336,8 @@ app.post("/donations/add", async (req, res) => {
       let participantfirstname = req.body.firstname;
       let participantlastname = req.body.lastname;
       let participantemail = req.body.participant_email;
-      let newParticipant = {participantfirstname, participantlastname, participantemail};
+      let participantrole = "participant";
+      let newParticipant = {participantfirstname, participantlastname, participantemail, participantrole};
       await knex("participant").insert(newParticipant);
       participantResult = await knex("participant").select("participantid").where({"participantemail": req.body.participant_email}).first();
     };
@@ -370,6 +371,7 @@ app.post("/donations/add", async (req, res) => {
     // On error, re-render the public donations page with an error message
     return res.render("donations", {
       donations: [],
+      q: "",
       isPublic: true,
       canEdit: false,
       error_message: `Could not submit donation: ${err.message}`,
@@ -479,6 +481,9 @@ app.post("/participants/add", requireAuth, requireAdmin, async (req, res) => {
     let participantemail = req.body.email;
     let password = req.body.password;
     let participantdob = req.body.dob;
+    if (!participantdob || participantdob.trim() === '') {
+      participantdob = null;
+    }
     let participantrole = "participant";
     let participantphone = req.body.phone;
     let participantcity = req.body.city;

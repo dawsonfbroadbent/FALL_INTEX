@@ -114,8 +114,8 @@
               <th>State</th>
               <th>School/Employer</th>
               <th>Field of Interest</th>
-              <th>Role</th>
               <% if (canEdit) { %>
+              <th>Role</th>
               <th>Actions</th>
               <% } %>
             </tr>
@@ -135,9 +135,8 @@
               <td><%= p.participantstate %></td>
               <td><%= p.participantschooloremployer %></td>
               <td><%= p.participantfieldofinterest %></td>
-
-              <td><%= p.participantrole %></td>
               <% if (canEdit) { %>
+              <td><%= p.participantrole %></td>
               <td class="action-buttons">
                 <a href="/milestones?participantid=<%= p.participantid %>" class="btn-milestones">Milestones</a>
                 <button type="button" class="btn-edit" onclick="openEditModal(this)"
@@ -153,7 +152,7 @@
                   data-school_employer="<%= p.participantschooloremployer %>"
                   data-field_of_interest="<%= p.participantfieldofinterest %>"
                 >Edit</button>
-                <form action="/participants/<%= p.participantid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this participant?')">
+                <form action="/participants/<%= p.participantid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this participant? Doing so will delete all associated donations, registrations, survey responses, etc.')">
                   <button type="submit" class="btn-delete">Delete</button>
                 </form>
               </td>
