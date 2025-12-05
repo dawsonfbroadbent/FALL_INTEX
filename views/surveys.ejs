@@ -34,7 +34,7 @@
 
       <% if (canEdit) { %>
       <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
-        <h3 style="margin-bottom: 20px;">Add New Survey</h3>
+        <h3 style="margin-bottom: 20px;">Add New Survey Response</h3>
         <form action="/surveys/add" method="POST">
           <div class="form-row">
             <div class="form-group">
@@ -68,8 +68,7 @@
             <label for="comment">Comments</label>
             <input type="text" id="comment" name="comment">
           </div>
-          <input type="hidden" id="submissiondate" name="submissiondate">
-          <button type="submit" class="btn btn-primary">Add Survey</button>
+          <button type="submit" class="btn btn-primary">Add Survey Response</button>
         </form>
       </div>
       <% } %>
@@ -122,7 +121,7 @@
               <td><%= s.surveyusefulnessscore %></td>
               <td><%= s.surveyinstructorscore %></td>
               <td><%= s.surveyrecommendationscore %></td>
-              <td><%= (s.surveysatisfactionscore + s.surveyusefulnessscore + s.surveyinstructorscore + s.surveyrecommendationscore) / 4 %></td>
+              <td><%= (Number(s.surveysatisfactionscore) + Number(s.surveyusefulnessscore) + Number(s.surveyinstructorscore) + Number(s.surveyrecommendationscore)) / 4 %></td>
               <% if (canEdit) { %>
               <td><%= s.surveynpsbucket %></td>
               <% } %>
@@ -143,6 +142,19 @@
               <td><%= s.surveysubmissiondate ? new Date(s.surveysubmissiondate).toLocaleDateString() : 'N/A' %></td>
               <% if (canEdit) { %>
               <td class="action-buttons">
+                <button type="button" class="btn-edit"
+                data-partid="<%= s.participantid %>"
+                data-eventid="<%= s.eventid %>"
+                data-email="<%= s.participantemail %>"
+                data-eventname="<%= s.eventname %>"
+                data-sat="<%= s.surveysatisfactionscore %>"
+                data-use="<%= s.surveyusefulnessscore %>"
+                data-inst="<%= s.surveyinstructorscore %>"
+                data-rec="<%= s.surveyrecommendationscore %>"
+                data-comments="<%= s.surveycomments || '' %>"
+                onclick="openEditModalFromData(this)">
+                Edit
+              </button>
                 <form action="/surveys/<%= s.participantid %>/<%= s.eventid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this survey?')">
                   <button type="submit" class="btn-delete">Delete</button>
                 </form>
@@ -157,27 +169,133 @@
     </div>
   </section>
 
+  <!-- ✅ Edit Modal -->
+<% if (canEdit) { %>
+  <div id="editModalBackdrop" class="modal-backdrop" onclick="backdropClose(event)">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="editModalTitle">Edit Survey</h3>
+        <button class="modal-close" type="button" onclick="closeEditModal()" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="editSurveyForm" method="POST">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit_event">Event ID</label>
+              <input type="text" id="edit_event" name="event" required readonly style="background-color: #f5f5f5;">
+            </div>
+            <div class="form-group">
+              <label for="edit_participant_email">Participant Email</label>
+              <input type="email" id="edit_participant_email" name="participant_email" required readonly style="background-color: #f5f5f5;">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit_sat">Satisfaction Score</label>
+              <input type="number" id="edit_sat" name="sat" max="5" min="0" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_use">Usefulness Score</label>
+              <input type="number" id="edit_use" name="use" max="5" min="0" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_inst">Instructor Score</label>
+              <input type="number" id="edit_inst" name="inst" max="5" min="0" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_rec">Recommendation Score</label>
+              <input type="number" id="edit_rec" name="rec" max="5" min="0" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit_comment">Comments</label>
+            <textarea id="edit_comment" name="comment" rows="4" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
   <%- include('partials/footer') %>
 
   <script>
-    function toggleComment(index) {
-      const commentDiv = document.getElementById('comment-' + index);
-      const button = commentDiv.nextElementSibling;
-
-      if (commentDiv.classList.contains('truncated')) {
-        commentDiv.classList.remove('truncated');
-        button.textContent = 'Read less';
-      } else {
-        commentDiv.classList.add('truncated');
-        button.textContent = 'Read more';
-      }
+  // Toggle Read More/Less
+  function toggleComment(index) {
+    const commentDiv = document.getElementById('comment-' + index);
+    const button = commentDiv.nextElementSibling;
+    if (commentDiv.classList.contains('truncated')) {
+      commentDiv.classList.remove('truncated');
+      button.textContent = 'Read less';
+    } else {
+      commentDiv.classList.add('truncated');
+      button.textContent = 'Read more';
     }
+  }
 
-    // Set the submission date/time when the form is submitted
-    document.querySelector('form').addEventListener('submit', function(e) {
-      const now = new Date().toISOString();
-      document.getElementById('submissiondate').value = now;
-    });
-  </script>
+  // DATE FIX: Target the form inside the #addForm container
+  const addSurveyContainer = document.getElementById('addForm');
+  if (addSurveyContainer) {
+    const addForm = addSurveyContainer.querySelector('form');
+    if (addForm) {
+      addForm.addEventListener('submit', function(e) {
+        const now = new Date().toISOString();
+        document.getElementById('submissiondate').value = now;
+      });
+    }
+  }
+
+  // MODAL LOGIC (Was missing)
+  const editModalBackdrop = document.getElementById('editModalBackdrop');
+  const editForm = document.getElementById('editSurveyForm');
+
+  function openEditModal(partId, eventId, email, eventName, sat, use, inst, rec, comments) {
+    // 1. Populate fields
+    document.getElementById('edit_event').value = eventId;
+    document.getElementById('edit_participant_email').value = email;
+    document.getElementById('edit_sat').value = sat;
+    document.getElementById('edit_use').value = use;
+    document.getElementById('edit_inst').value = inst;
+    document.getElementById('edit_rec').value = rec;
+    document.getElementById('edit_comment').value = comments;
+
+    // 2. Set Form Action dynamically so it updates the correct row
+    editForm.action = `/surveys/${partId}/${eventId}/edit`;
+
+    // 3. Show Modal
+    editModalBackdrop.style.display = 'flex'; // or 'block' depending on CSS
+  }
+
+  function closeEditModal() {
+    editModalBackdrop.style.display = 'none';
+  }
+
+  function backdropClose(event) {
+    if (event.target === editModalBackdrop) {
+      closeEditModal();
+    }
+  }
+
+  function openEditModalFromData(button) {
+  const partId = button.getAttribute('data-partid');
+  const eventId = button.getAttribute('data-eventid');
+  const email = button.getAttribute('data-email');
+  const eventName = button.getAttribute('data-eventname');
+  const sat = button.getAttribute('data-sat');
+  const use = button.getAttribute('data-use');
+  const inst = button.getAttribute('data-inst');
+  const rec = button.getAttribute('data-rec');
+  const comments = button.getAttribute('data-comments');
+  
+  openEditModal(partId, eventId, email, eventName, sat, use, inst, rec, comments);
+}
+</script>
 </body>
 </html>
