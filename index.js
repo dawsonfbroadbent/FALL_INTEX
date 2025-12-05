@@ -19,7 +19,7 @@ const knex = require("knex")({
     user: process.env.PGUSER || process.env.RDS_USERNAME || "postgres",
     password: process.env.PGPASSWORD || process.env.RDS_PASSWORD || "admin",
     database: process.env.PGDATABASE || process.env.RDS_DB_NAME || "is403",
-    port: Number(process.env.PGPORT || process.env.RDS_PORT || 5432),
+    port: Number(process.env.PGPORT || process.env.RDS_PORT || 5433),
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
   },
 });
@@ -506,6 +506,7 @@ app.get("/surveys", requireAuth, async (req, res) => {
       'surveyresponse.surveycomments',
       // Join and select fields from other tables
       knex.raw("?? || ' ' || ?? as participantname", ['participant.participantfirstname', 'participant.participantlastname']),
+      'participant.participantemail',
       'eventoccurrence.eventname',
       'npsbucket.surveynpsbucket'
     )
@@ -564,15 +565,25 @@ app.post("/surveys/add", requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
-/*
-We need to change this to redirect to another ejs file
-*/
+// Edit survey response route
 app.post("/surveys/:participantid/:eventid/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await knex("surveyresponse").where({ id: req.params.id }).update(req.body);
+    const participantid = req.params.participantid;
+    const eventid = req.params.eventid;
+
+    let surveysatisfactionscore = req.body.sat;
+    let surveyusefulnessscore = req.body.use;
+    let surveyinstructorscore = req.body.inst;
+    let surveyrecommendationscore = req.body.req;
+    let surveycomments = req.body.comment;
+    let newSurvey = {participantid, eventid, surveysatisfactionscore, surveyusefulnessscore, surveyinstructorscore, surveyrecommendationscore};
+
+    await knex("surveyresponse").where({ "participantid": participantid }).andWhere({ "eventid": eventid})
+    .update(newSurvey);
     res.redirect("/surveys");
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error("Error updating event:", err);
+    res.redirect("/surveys?error_message=" + encodeURIComponent("Failed to update survey response."));
   }
 });
 
@@ -672,59 +683,6 @@ app.post("/milestones/:participantid/:milestonedate/delete", requireAuth, requir
   try {
     await knex("milestones").where({ "participantid": req.params.participantid }).andWhere({ "milestonedate": req.params.milestonedate }).del();
     res.redirect("/milestones");
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
-
-// Users page route
-app.get("/users", requireAuth, requireAdmin, async (req, res) => {
-  const q = (req.query.q || "").trim();
-  try {
-    // Get array of users from database (search by username if included in request)
-    let query = knex("users").select("id", "username", "level").orderBy("username", "asc");
-    if (q) {
-      query = query.whereILike("username", `%${q}%`);
-    }
-    const users = await query;
-
-    // Render maintainUsers page with array of users
-    res.render("maintainUsers", { users, q, error_message: "" });
-  } catch (err) {
-    // Render maintainUsers page with an error message
-    res.render("maintainUsers", { users: [], q, error_message: err.message });
-  }
-});
-
-/*
-We need to change this to redirect to another ejs file
-*/
-app.post("/users/add", requireAuth, requireAdmin, async (req, res) => {
-  try {
-    await knex("users").insert(req.body); // best practice: whitelist fields
-    res.redirect("/users");
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
-
-/*
-We need to change this to redirect to another ejs file
-*/
-app.post("/users/:id/edit", requireAuth, requireAdmin, async (req, res) => {
-  try {
-    await knex("users").where({ id: req.params.id }).update(req.body);
-    res.redirect("/users");
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
-
-// Delete user route
-app.post("/users/:id/delete", requireAuth, requireAdmin, async (req, res) => {
-  try {
-    await knex("users").where({ id: req.params.id }).del();
-    res.redirect("/users");
   } catch (err) {
     res.status(500).send(err.message);
   }
