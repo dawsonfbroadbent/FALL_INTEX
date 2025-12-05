@@ -21,10 +21,11 @@
 
   <section class="content-section">
     <div class="container">
+      <!-- Error messaging from server-side validation -->
       <% if (error_message) { %>
       <div class="alert alert-error"><%= error_message %></div>
       <% } %>
-
+        <!-- Search + Add Survey button row -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
         <form action="/surveys" method="GET" class="search-box" style="margin-bottom: 0;">
           <input type="text" name="q" placeholder="Search surveys..." value="<%= q || '' %>">
@@ -34,7 +35,7 @@
         <button type="button" class="btn btn-primary" onclick="document.getElementById('addForm').style.display = document.getElementById('addForm').style.display === 'none' ? 'block' : 'none'">Add Survey</button>
         <% } %>
       </div>
-
+      <!-- Only admins/managers can add survey entries -->
       <% if (canEdit) { %>
       <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
         <h3 style="margin-bottom: 20px;">Add New Survey Response</h3>
@@ -75,7 +76,7 @@
         </form>
       </div>
       <% } %>
-
+      <!-- Quick legend so users know what S/U/I/R mean -->
       <div class="score-legend" aria-label="Score legend">
         <span class="legend-title">Scores Legend:</span>
         <span class="legend-item"><span class="legend-badge">S</span> Satisfaction</span>
@@ -116,6 +117,7 @@
               <td colspan="<%= canEdit ? 10 : 9 %>" style="text-align: center; color: #666;">No surveys found.</td>
             </tr>
             <% } else { %>
+               <!-- Loop each survey -->
             <% surveys.forEach((s, index) => { %>
             <tr>
               <td><%= s.participantname %></td>
@@ -128,6 +130,7 @@
               <% if (canEdit) { %>
               <td><%= s.surveynpsbucket %></td>
               <% } %>
+              <!-- Long comments get collapsible UI -->
               <td class="comments-cell">
                 <% if (s.surveycomments && s.surveycomments.length > 100) { %>
                   <div class="comment-text truncated" id="comment-<%= index %>">
@@ -143,6 +146,7 @@
                 <% } %>
               </td>
               <td><%= s.surveysubmissiondate ? new Date(s.surveysubmissiondate).toLocaleDateString() : 'N/A' %></td>
+              <!-- Edit / Delete buttons (admin only) -->
               <% if (canEdit) { %>
               <td class="action-buttons">
                 <button type="button" class="btn-edit"
@@ -158,6 +162,7 @@
                 onclick="openEditModalFromData(this)">
                 Edit
               </button>
+              <!-- Delete route still uses composite PK (participant + event) -->
                 <form action="/surveys/<%= s.participantid %>/<%= s.eventid %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this survey?')">
                   <button type="submit" class="btn-delete">Delete</button>
                 </form>

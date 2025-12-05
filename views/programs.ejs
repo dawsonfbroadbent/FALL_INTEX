@@ -234,7 +234,7 @@
                 cultural story and their educational journey can move forward together.
             </p>
             </div>
-
+            <!-- grouping each image in its own wrapper helps with consistent sizing/layout -->
             <div class="er-program-images-container">
                 <div class="er-program-images er-program-images-multi">
                 <div class="er-program-image-wrapper">
@@ -278,6 +278,7 @@
             const header = document.querySelector('header');
             const headerHeight = header ? header.offsetHeight : 0;
       
+             // calculate scroll target — centers the section in the viewport
             const rect = target.getBoundingClientRect();
             const absoluteTop = rect.top + window.pageYOffset;
             const elementCenter = absoluteTop + rect.height / 2;

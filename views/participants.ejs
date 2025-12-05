@@ -24,18 +24,20 @@
       <% if (error_message) { %>
       <div class="alert alert-error"><%= error_message %></div>
       <% } %>
-
+         <!-- search + add button row -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
         <form action="/participants" method="GET" class="search-box" style="margin-bottom: 0;">
           <input type="text" name="q" placeholder="Search participants..." value="<%= q || '' %>">
           <button type="submit" class="btn btn-secondary">Search</button>
         </form>
         <% if (canEdit) { %>
+          <!-- toggle add participant form -->
         <button type="button" class="btn btn-primary" onclick="document.getElementById('addForm').style.display = document.getElementById('addForm').style.display === 'none' ? 'block' : 'none'">Add Participant</button>
         <% } %>
       </div>
 
       <% if (canEdit) { %>
+        <!-- collapsible add participant form -->
       <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
         <h3 style="margin-bottom: 20px;">Add New Participant</h3>
         <form action="/participants/add" method="POST">
@@ -83,6 +85,7 @@
             <label for="school_employer">School or Employer</label>
             <input type="text" id="school_employer" name="school_employer">
           </div>
+           <!-- radio buttons for field of interest -->
           <div class="form-group">
             <label class="form-label">Field of Interest</label>
           
@@ -102,7 +105,7 @@
       </div>
       <% } %>
 
-      <!-- ✅ Scrollable table container (sticky header) -->
+      <!-- scrollable table wrapper -->
       <div class="table-scroll" role="region" aria-label="Participants table" tabindex="0">
         <table class="sticky-table">
           <thead>
@@ -123,6 +126,7 @@
           <tbody>
             <% if (participants.length === 0) { %>
             <tr>
+              <!-- adjust col count based on permissions -->
               <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No participants found.</td>
             </tr>
             <% } else { %>
@@ -137,6 +141,7 @@
               <td><%= p.participantfieldofinterest %></td>
               <% if (canEdit) { %>
               <td><%= p.participantrole %></td>
+              <!-- edit + delete actions -->
               <td class="action-buttons">
                 <a href="/milestones?participantid=<%= p.participantid %>" class="btn-milestones">Milestones</a>
                 <button type="button" class="btn-edit" onclick="openEditModal(this)"
@@ -166,7 +171,7 @@
     </div>
   </section>
 
-  <!-- ✅ Edit Modal -->
+  <!-- modal for editing an existing participant -->
   <% if (canEdit) { %>
     <div id="editModalBackdrop" class="modal-backdrop" onclick="backdropClose(event)">
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" onclick="event.stopPropagation()">
@@ -176,6 +181,7 @@
         </div>
 
         <div class="modal-body">
+          <!-- form action set dynamically in js -->
           <form id="editParticipantForm" method="POST">
             <div class="form-row">
               <div class="form-group">
@@ -247,6 +253,7 @@
   <% } %>
 
   <script>
+    // fills the modal fields with existing participant data
     function openEditModal(button) {
       const backdrop = document.getElementById('editModalBackdrop');
       const form = document.getElementById('editParticipantForm');
@@ -279,11 +286,12 @@
       backdrop.style.display = 'none';
       document.body.style.overflow = '';
     }
-
+    // allow clicking outside modal to close
     function backdropClose(event) {
       if (event.target.id === 'editModalBackdrop') closeEditModal();
     }
-
+    
+    // allow esc key to close modal
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeEditModal();
     });

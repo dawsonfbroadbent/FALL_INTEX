@@ -15,17 +15,20 @@
 
   <div class="ca-wrap">
     <div class="ca-card">
+      <!-- main header area for the create account flow -->
       <div class="ca-hero">
         <h1>Create Your Account</h1>
         <p>Join Ella Rises to participate in programs, events, and updates.</p>
       </div>
 
       <div class="ca-body">
+        <!-- show server validation errors if any -->
         <% if (error_message) { %>
           <div class="alert alert-error"><%= error_message %></div>
         <% } %>
-
+          <!-- main account creation form -->
         <form action="/createaccount" method="POST" id="createAccountForm" novalidate>
+          <!-- basic identity info -->
           <div class="form-row">
             <div class="form-group">
               <label for="firstname">First Name</label>
@@ -36,7 +39,7 @@
               <input type="text" id="lastname" name="lastname" autocomplete="family-name" required />
             </div>
           </div>
-
+          <!-- login credentials -->
           <div class="form-row">
             <div class="form-group">
               <label for="email">Email</label>
@@ -48,7 +51,7 @@
               <div class="ca-hint">Use at least 8 characters if possible (mix letters + numbers).</div>
             </div>
           </div>
-
+          <!-- password confirmation -->
           <div class="form-row">
             <div class="form-group">
               <label for="confirm_password">Confirm Password</label>
@@ -62,7 +65,7 @@
               <div class="ca-hint">Optional</div>
             </div>
           </div>
-
+          <!-- contact/location info -->
           <div class="form-row">
             <div class="form-group">
               <label for="phone">Phone</label>
@@ -87,7 +90,7 @@
               <input type="text" id="school_employer" name="school_employer" />
             </div>
           </div>
-
+          <!-- field of interest (used later in dashboard filtering) -->
           <div class="form-group">
             <label class="form-label">Field of Interest</label>
             <div class="interest-options" role="radiogroup" aria-label="Field of Interest">
@@ -101,16 +104,16 @@
               <label for="both" class="interest-pill">Both</label>
             </div>
           </div>
-
+          <!-- submit button -->
           <button type="submit" class="btn btn-primary ca-btn-wide" id="submitBtn">
             Create Account
           </button>
-
+          <!-- login redirect -->
           <div class="ca-helper-row">
             <span>Already have an account?</span>
             <a href="/login" class="ca-link-btn">Login</a>
           </div>
-
+          <!-- privacy note -->
           <div class="ca-small-note">
             By creating an account, you agree to be contacted about program updates. We’ll never share your information.
           </div>
@@ -132,7 +135,7 @@
       function checkMatch() {
         const p = pw.value || "";
         const c = cpw.value || "";
-
+        // hide message if nothing typed yet
         if (!p && !c) {
           msg.style.display = "none";
           msg.textContent = "";
@@ -153,7 +156,7 @@
           cpw.setCustomValidity("Passwords do not match");
         }
       }
-
+      // prevent submit if browser validation fails
       pw.addEventListener("input", checkMatch);
       cpw.addEventListener("input", checkMatch);
 

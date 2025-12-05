@@ -24,17 +24,19 @@
       <% if (error_message) { %>
       <div class="alert alert-error"><%= error_message %></div>
       <% } %>
-
+        <!-- search bar + add button row -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
         <form action="/milestones" method="GET" class="search-box" style="margin-bottom: 0;">
           <input type="text" name="q" placeholder="Search...">
           <button type="submit" class="btn btn-secondary">Search</button>
         </form>
         <% if (canEdit) { %>
+          <!-- toggles the add milestone form -->
         <button type="button" class="btn btn-primary" onclick="document.getElementById('addForm').style.display = document.getElementById('addForm').style.display === 'none' ? 'block' : 'none'">Add Milestone</button>
         <% } %>
       </div>
-
+      
+       <!-- collapsible add milestone form -->
       <% if (canEdit) { %>
       <div id="addForm" class="card" style="display: none; margin-bottom: 30px;">
         <h3 style="margin-bottom: 20px;">Add New Milestone</h3>
@@ -58,7 +60,7 @@
       </div>
       <% } %>
 
-      <!-- ✅ Scrollable table container (sticky header) -->
+      <!-- table wrapper: keeps header sticky + adds scroll on overflow -->
       <div class="table-scroll" role="region" aria-label="Milestones table" tabindex="0">
         <table class="sticky-table">
           <thead>
@@ -74,6 +76,7 @@
           <tbody>
             <% if (milestones.length === 0) { %>
             <tr>
+              <!-- adjust colspan when edit permissions change -->
               <td colspan="<%= canEdit ? 5 : 4 %>" style="text-align: center; color: #666;">No milestones found.</td>
             </tr>
             <% } else { %>
@@ -83,12 +86,14 @@
               <td><%= m.title || 'N/A' %></td>
               <td><%= m.date ? new Date(m.date).toLocaleDateString() : 'N/A' %></td>
               <% if (canEdit) { %>
+                <!-- edit button loads values into modal using data-* attributes -->
                 <td class="action-buttons">
                   <button type="button" class="btn-edit" onclick="openEditModal(this)"
                     data-participantid="<%= m.participantid %>"
                     data-oldtitle="<%= m.title || '' %>"
                     data-date="<%= m.date ? new Date(m.date).toISOString().split('T')[0] : '' %>"
                   >Edit</button>
+                  <!-- delete route uses participantid + encoded title -->
                   <form action="/milestones/<%= m.participantid %>/<%= encodeURIComponent(m.title || '') %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this milestone?')">
                     <button type="submit" class="btn-delete">Delete</button>
                   </form>
@@ -103,7 +108,7 @@
     </div>
   </section>
 
-  <!-- ✅ Edit Modal -->
+  <!-- modal for editing milestone details -->
 <% if (canEdit) { %>
   <div id="editModalBackdrop" class="modal-backdrop" onclick="backdropClose(event)">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" onclick="event.stopPropagation()">
@@ -113,6 +118,7 @@
       </div>
 
       <div class="modal-body">
+        <!-- form action updated dynamically through js -->
         <form id="editMilestoneForm" method="POST">
           <div class="form-row">
             <div class="form-group">
@@ -145,7 +151,7 @@
     const pad = (n) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   }
-
+// opens modal + preloads form fields
   function openEditModal(button) {
     const backdrop = document.getElementById('editModalBackdrop');
     const form = document.getElementById('editMilestoneForm');
@@ -171,11 +177,11 @@
     backdrop.style.display = 'none';
     document.body.style.overflow = '';
   }
-
+// close modal when clicking outside card
   function backdropClose(event) {
     if (event.target.id === 'editModalBackdrop') closeEditModal();
   }
-
+  // esc key closes modal as well
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeEditModal();
   });
