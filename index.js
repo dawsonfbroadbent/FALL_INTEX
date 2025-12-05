@@ -424,13 +424,17 @@ app.post("/donations/:participantid/:donationnumber/delete", requireAuth, requir
 
 // Get participants route
 app.get("/participants", requireAuth, async (req, res) => {
+  // Grab the search query from ?q=... and normalize whitespace
   const q = (req.query.q || "").trim();
 
+
   try {
+    // Base query: select all participants ordered by ID
     const query = knex("participant")
       .select("*")
       .orderBy("participantid", "asc");
 
+    // If there is a search term, add flexible filtering
     if (q) {
       const qLower = q.toLowerCase();
       const roleAlias =
@@ -438,7 +442,9 @@ app.get("/participants", requireAuth, async (req, res) => {
         ["participants", "participant"].includes(qLower) ? "participant" :
         null;
 
+      // Wrap filters in a WHERE (...) block so we can OR multiple fields
       query.where(function () {
+        // Search across multiple participant fields using ILIKE for case-insensitive match
         this.where("participantfirstname", "ilike", `%${q}%`)
           .orWhere("participantlastname", "ilike", `%${q}%`)
           .orWhere("participantemail", "ilike", `%${q}%`)
@@ -448,21 +454,25 @@ app.get("/participants", requireAuth, async (req, res) => {
           .orWhere("participantfieldofinterest", "ilike", `%${q}%`)
           .orWhere("participantrole", "ilike", `%${q}%`);
 
-        // If they typed "admins" or "participants", also match the canonical role value
+        // If they typed "admins" or "participants", also match the exact role value
         if (roleAlias) {
           this.orWhere("participantrole", roleAlias);
         }
       });
     }
 
+    // Execute the built participants query
     const participants = await query;
 
+    // Render the participants page and keep the search term
     res.render("participants", {
       participants,
       q,
       canEdit: isAdmin(req.session.level),
       error_message: "",
     });
+  
+  // Error Handling
   } catch (err) {
     res.render("participants", {
       participants: [],
@@ -476,14 +486,19 @@ app.get("/participants", requireAuth, async (req, res) => {
 // Add participant route
 app.post("/participants/add", requireAuth, requireAdmin, async (req, res) => {
   try {
+    // Pull form fields from the request body
     let participantfirstname = req.body.firstname;
     let participantlastname = req.body.lastname;
     let participantemail = req.body.email;
     let password = req.body.password;
     let participantdob = req.body.dob;
+
+    // Allow DOB to be optional (store as NULL if blank)
     if (!participantdob || participantdob.trim() === '') {
       participantdob = null;
     }
+
+    // New participants created here are always "participant" role (not admin)
     let participantrole = "participant";
     let participantphone = req.body.phone;
     let participantcity = req.body.city;
@@ -492,6 +507,7 @@ app.post("/participants/add", requireAuth, requireAdmin, async (req, res) => {
     let participantschooloremployer = req.body.school_employer;
     let participantfieldofinterest = req.body.field_of_interest;
 
+    // Build the object to insert into the participant table
     let newParticipant = {
       participantemail,
       password,
@@ -506,8 +522,12 @@ app.post("/participants/add", requireAuth, requireAdmin, async (req, res) => {
       participantschooloremployer,
       participantfieldofinterest
     };
+    
+    // Connect to the database and insert the new participant, then reload the participants page
     await knex("participant").insert(newParticipant);
     res.redirect("/participants");
+  
+  //Error Handling
   } catch (err) {
     res.status(500).send(err.message);
   }
@@ -516,8 +536,10 @@ app.post("/participants/add", requireAuth, requireAdmin, async (req, res) => {
 // Edit participant route
 app.post("/participants/:participantid/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
+    //Gets the paricipant Id of the participant we want to edit
     const participantid = req.params.participantid;
 
+    //Gets our updates from the form
     const updates = {
       participantfirstname: req.body.firstname,
       participantlastname: req.body.lastname,
@@ -532,11 +554,15 @@ app.post("/participants/:participantid/edit", requireAuth, requireAdmin, async (
       participantfieldofinterest: req.body.field_of_interest || null,
     };
 
+    //Sends those updates to the database
     await knex("participant")
       .where({ participantid })
       .update(updates);
 
+    //Reloads the participants page
     res.redirect("/participants");
+
+  // Error Handling
   } catch (err) {
     console.error("Edit participant error:", err);
     res.redirect("/participants?error=Edit%20failed");
@@ -546,8 +572,11 @@ app.post("/participants/:participantid/edit", requireAuth, requireAdmin, async (
 // Delete participant route
 app.post("/participants/:participantid/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
+    //Connects to the database, deletes the participant we selected by ID, and reloads the participants page
     await knex("participant").where({ "participantid": req.params.participantid }).del();
     res.redirect("/participants");
+  
+  // Error Handling
   } catch (err) {
     res.status(500).send(err.message);
   }
@@ -555,17 +584,22 @@ app.post("/participants/:participantid/delete", requireAuth, requireAdmin, async
 
 // Event occurrence page route
 app.get("/events", requireAuth, async (req, res) => {
+  // Search term from query string and any error passed via redirect
   const q = (req.query.q || "").trim();
   const error_message = req.query.error_message || "";
 
   try {
+    // Base query: all event occurrences ordered by most recent first
     let query = knex("eventoccurrence").select("*").orderBy("eventdatetimestart", "desc");
+
+    // If a search term exists, filter by event name or location (case-insensitive)
     if (q) {
       query = query.where((b) => {
         b.whereILike("eventname", `%${q}%`).orWhereILike("eventlocation", `%${q}%`);
       });
     }
 
+    // Load filtered events, list of event templates, and distinct locations
     const [events, eventtemplates, locations] = await Promise.all([
       query,
       knex("eventtemplate").select("eventname").orderBy("eventname"),
@@ -575,6 +609,7 @@ app.get("/events", requireAuth, async (req, res) => {
         .orderBy("eventlocation"),
     ]);
 
+    // Render events page with data, search term, and admin edit permissions
     res.render("events", {
       events,
       eventtemplates,
@@ -583,6 +618,8 @@ app.get("/events", requireAuth, async (req, res) => {
       canEdit: isAdmin(req.session.level),
       error_message,
     });
+  
+  // Error Handling
   } catch (err) {
     // keep page renderable even on error
     const [eventtemplates, locations] = await Promise.all([
@@ -593,6 +630,7 @@ app.get("/events", requireAuth, async (req, res) => {
         .orderBy("eventlocation"),
     ]);
 
+    // Render the Events Page
     res.render("events", {
       events: [],
       eventtemplates,
@@ -607,14 +645,19 @@ app.get("/events", requireAuth, async (req, res) => {
 // Add event route
 app.post("/events/add", requireAuth, requireAdmin, async (req, res) => {
   try {
+    //Gets info from the form body
     let eventname = req.body.event_name;
     let eventdatetimestart = req.body.eventdatetimestart;
     let eventdatetimeend = req.body.eventdatetimeend;
     let eventlocation = req.body.eventlocation;
     let eventregistrationdeadline = req.body.eventregistrationdeadline;
     let newEvent = {eventname, eventdatetimestart, eventdatetimeend, eventlocation, eventregistrationdeadline};
+
+    // Connects to the Database and inserts the new event 
     await knex("eventoccurrence").insert(newEvent);
     res.redirect("/events");
+
+  // Error Handling
   } catch (err) {
     res.status(500).send(err.message);
   }
@@ -623,7 +666,10 @@ app.post("/events/add", requireAuth, requireAdmin, async (req, res) => {
 //Edit Event Occurrence Route
 app.post("/events/:eventid/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
+    // Event ID we want to update, pulled from the URL parameter
     const id = req.params.eventid;
+
+    // Destructure updated fields from the submitted form
     const {
       eventname,
       eventdatetimestart,
@@ -632,9 +678,11 @@ app.post("/events/:eventid/edit", requireAuth, requireAdmin, async (req, res) =>
       eventregistrationdeadline
     } = req.body;
 
+    //Debug Logs
     console.log("Editing event ID:", id); // Debug log
     console.log("Request body:", req.body); // Debug log
 
+    // Apply updates to the eventoccurrence record that matches this eventid
     const updated = await knex("eventoccurrence")
       .where({ eventid: id })
       .update({
@@ -645,9 +693,13 @@ app.post("/events/:eventid/edit", requireAuth, requireAdmin, async (req, res) =>
         eventregistrationdeadline
       });
 
+    // Debug Log
     console.log(`Updated ${updated} event(s)`); // Debug log
 
+    //Redirects back to the events page
     res.redirect("/events");
+
+  // Error Handling
   } catch (err) {
     console.error("Error updating event:", err);
     res.redirect("/events?error_message=" + encodeURIComponent("Failed to update event."));
@@ -657,8 +709,11 @@ app.post("/events/:eventid/edit", requireAuth, requireAdmin, async (req, res) =>
 // Delete event occurrence route
 app.post("/events/:eventid/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
+    // Finds the event we selected and deletes that instance, then redirects back to events
     await knex("eventoccurrence").where({ "eventid": req.params.eventid }).del();
     res.redirect("/events");
+
+  // Error handling
   } catch (err) {
     res.status(500).send(err.message);
   }
@@ -666,9 +721,11 @@ app.post("/events/:eventid/delete", requireAuth, requireAdmin, async (req, res) 
 
 // Survey page route
 app.get("/surveys", requireAuth, async (req, res) => {
-  // Retrive survey responses from database (if request includes search, incldue in knex query)
+  // Retrieve search term from query string (used to filter surveys)
   const q = (req.query.q || "").trim();
+
   try {
+    // Base query: survey responses joined with participant, event, and NPS bucket
     let query = knex("surveyresponse")
     .select(
       'surveyresponse.participantid',
@@ -679,16 +736,21 @@ app.get("/surveys", requireAuth, async (req, res) => {
       'surveyresponse.surveyinstructorscore',
       'surveyresponse.surveyrecommendationscore',
       'surveyresponse.surveycomments',
-      // Join and select fields from other tables
+      
+      // Build participant full name from first + last
       knex.raw("?? || ' ' || ?? as participantname", ['participant.participantfirstname', 'participant.participantlastname']),
+      // Additional joined fields
       'participant.participantemail',
       'eventoccurrence.eventname',
       'npsbucket.surveynpsbucket'
     )
+    // Joins tables
     .leftJoin('participant', 'surveyresponse.participantid', 'participant.participantid')
     .leftJoin('eventoccurrence', 'surveyresponse.eventid', 'eventoccurrence.eventid')
     .leftJoin('npsbucket', 'surveyresponse.surveyrecommendationscore', 'npsbucket.surveyrecommendationscore')
     .orderBy("surveysubmissiondate", "desc");
+
+    // If there is a search term, filter by participant email, event name, or event location
     if (q) {
         query.where((b) => {
             b.whereILike("participant.participantemail", `%${q}%`)
@@ -696,6 +758,8 @@ app.get("/surveys", requireAuth, async (req, res) => {
               .orWhereILike("eventoccurrence.eventlocation", `%${q}%`);
         });
     }
+
+    // Execute the query and get all matching survey rows
     const surveys = await query;
 
     // Render surveys page with array of survey responses
@@ -705,6 +769,8 @@ app.get("/surveys", requireAuth, async (req, res) => {
       canEdit: isAdmin(req.session.level),
       error_message: "",
     });
+
+  //Error Handling
   } catch (err) {
     // Render surveys page with empty array and an error message
     res.render("surveys", {
@@ -720,10 +786,15 @@ app.get("/surveys", requireAuth, async (req, res) => {
 // Add survey route
 app.post("/surveys/add", requireAuth, requireAdmin, async (req, res) => {
   try {
+    // Look up the participant by email from the form
     let participantResult = await knex("participant").select("participantid").where({"participantemail": req.body.participant_email}).first()
+    
+    // If the email doesn't match any participant, stop and return 404
     if (!participantResult) {
       return res.status(404).send("Participant not found with that email");
     }
+
+    // Extract the participant ID and form fields
     let participantid = participantResult.participantid
     let eventid = req.body.event;
     let surveysatisfactionscore = req.body.sat;
@@ -732,9 +803,15 @@ app.post("/surveys/add", requireAuth, requireAdmin, async (req, res) => {
     let surveyrecommendationscore = req.body.rec;
     let surveycomments = req.body.comment;
     let surveysubmissiondate = req.body.submissiondate;
+    
+    // Build the new survey response record
     let newSurvey = {participantid, eventid, surveysatisfactionscore, surveyusefulnessscore, surveyinstructorscore, surveyrecommendationscore, surveycomments, surveysubmissiondate};
+    
+    // Insert the survey into the surveyresponse table and redirect to surveys
     await knex("surveyresponse").insert(newSurvey);
     res.redirect("/surveys");
+
+  // Error Handling
   } catch (err) {
     res.status(500).send(err.message);
   }
@@ -743,19 +820,26 @@ app.post("/surveys/add", requireAuth, requireAdmin, async (req, res) => {
 // Edit survey response route
 app.post("/surveys/:participantid/:eventid/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
+    // Identify the survey row by participant + event from URL params
     const participantid = req.params.participantid;
     const eventid = req.params.eventid;
 
+    // Updated information from the edit form
     let surveysatisfactionscore = req.body.sat;
     let surveyusefulnessscore = req.body.use;
     let surveyinstructorscore = req.body.inst;
-    let surveyrecommendationscore = req.body.req;
+    let surveyrecommendationscore = req.body.rec;
     let surveycomments = req.body.comment;
-    let newSurvey = {participantid, eventid, surveysatisfactionscore, surveyusefulnessscore, surveyinstructorscore, surveyrecommendationscore};
 
+    //// Build object with updated fields to write back to the DB
+    let newSurvey = {participantid, eventid, surveysatisfactionscore, surveyusefulnessscore, surveyinstructorscore, surveyrecommendationscore, surveycomments};
+
+    // Build object with updated fields to write back to the DB, then redirect back to the surveys page
     await knex("surveyresponse").where({ "participantid": participantid }).andWhere({ "eventid": eventid})
     .update(newSurvey);
     res.redirect("/surveys");
+
+  //Error Handling
   } catch (err) {
     console.error("Error updating event:", err);
     res.redirect("/surveys?error_message=" + encodeURIComponent("Failed to update survey response."));
@@ -765,8 +849,11 @@ app.post("/surveys/:participantid/:eventid/edit", requireAuth, requireAdmin, asy
 // Delete survey response route
 app.post("/surveys/:participantid/:eventid/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
+    // Gets the Survey we selected by Participant and Event ID and deletes that record, then redirects back to surveys
     await knex("surveyresponse").where({ "participantid": req.params.participantid }).andWhere({ "eventid": req.params.eventid }).del();
     res.redirect("/surveys");
+
+  // Error Handling
   } catch (err) {
     res.status(500).send(err.message);
   }
@@ -774,29 +861,45 @@ app.post("/surveys/:participantid/:eventid/delete", requireAuth, requireAdmin, a
 
 // Milestones (1-to-many with participants)
 app.get("/milestones", requireAuth, async (req, res) => {
+  // Optional filters: specific participant and/or search term
   const participantid = req.query.participantid;
   const q = (req.query.q || "").trim();
+
   try {
     // Get all milestones from database (search for individual's milestones if included in request)
     let query = knex("milestones").select("*").orderBy("milestonedate", "desc");
+
+    // If a specific participant ID is provided, filter to that participant's milestones
     if (participantid) query = query.where({"participantid": participantid});
+
+    // If a search term is provided, join to participant and search by name or milestone title
     if (q) query = query.join("participant", 'milestones.participantid', 'participant.participantid')
     .where((b) => {
       b.whereILike("participant.participantfirstname", `%${q}%`)
       .orWhereILike("participant.participantlastname", `%${q}%`).orWhereILike("milestones.milestonetitle", `%${q}%`)});
-    const all = await query;
+    
+    // Run the query and get all matching milestone rows
+      const all = await query;
 
+    // Map DB rows into a display-friendly milestones array
     let milestones = [];
     for (let iCount = 0; iCount < all.length; iCount++) {
+      // Format milestone date as MM/DD/YYYY
       let milestoneDate = all[iCount].milestonedate;
       let formattedDate = new Date(milestoneDate).toLocaleDateString("en-US", {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit'
         });
+
+      // Milestone title from the row
       let milestoneTitle = all[iCount].milestonetitle
+
+      // Look up participant name for this milestone
       let donor = await knex("participant").select("participantfirstname", "participantlastname").where({"participantid": all[iCount].participantid}).first();
       let donorFullName = donor.participantfirstname + " " + donor.participantlastname;
+      
+      // Push a simplified milestone object for the view
       milestones.push({
         date: formattedDate,
         title: milestoneTitle,
@@ -812,6 +915,8 @@ app.get("/milestones", requireAuth, async (req, res) => {
       canEdit: isAdmin(req.session.level),
       error_message: "",
     });
+
+  // Error Handling
   } catch (err) {
     // Render milestones page with empty array and an error message
     res.render("milestones", {
@@ -826,32 +931,49 @@ app.get("/milestones", requireAuth, async (req, res) => {
 // Add milestone route
 app.post("/milestones/add", requireAuth, requireAdmin, async (req, res) => {
   try {
+    // Look up the participant by email from the form
     let participantResult = await knex("participant").select("participantid").where({"participantemail": req.body.participant_email}).first();
+    
+    // If there is no participant with that email, stop and return 404
     if (!participantResult) {
       return res.status(404).send("Participant not found with that email");
     };
+
+    // Extract the participant ID and milestone details from the form
     let participantid = participantResult.participantid;
     let milestonetitle = req.body.milestonetitle;
     let milestonedate = req.body.milestonedate;
+
+    // Build milestone record linked to this participant
     let newMilestone = {participantid, milestonetitle, milestonedate};
+
+    // Insert the new milestone into the milestones table and redirect back to milestones
     await knex("milestones").insert(newMilestone);
     res.redirect("/milestones");
+
+  // Error Handling
   } catch (err) {
     res.status(500).send(err.message);
   }
 });
 
-// Edit Milestone Route
+// Edit Milestone Route (admin-only)
+// Uses a transaction to "replace" a milestone whose title is part of the composite key
 app.post("/milestones/:participantid/:oldtitle/edit", requireAuth, requireAdmin, async (req, res) => {
   try {
+    // Identify which milestone to edit via URL params
     const participantid = req.params.participantid;
     const oldtitle = decodeURIComponent(req.params.oldtitle);
+
+    // New values submitted from the form
     const { milestonedate, milestonetitle } = req.body;
 
+    // Debug log
     console.log('Edit params:', { participantid, oldtitle, milestonedate, milestonetitle });
 
+    // Wrap delete + insert in a transaction so it's all-or-nothing
     await knex.transaction(async (trx) => {
-      // Delete old record using the PK (participantid + old title)
+      // Delete old record using the composite key (participantid + old title)
       const deleted = await trx("milestones")
         .where({ 
           participantid: participantid,
@@ -859,9 +981,10 @@ app.post("/milestones/:participantid/:oldtitle/edit", requireAuth, requireAdmin,
         })
         .delete();
 
+      // Debug log for deleted row
       console.log('Rows deleted:', deleted);
 
-      // Insert new record with updated values
+      // Insert new record with updated title/date for the same participant
       await trx("milestones").insert({
         participantid: participantid,
         milestonedate: milestonedate,
@@ -869,19 +992,25 @@ app.post("/milestones/:participantid/:oldtitle/edit", requireAuth, requireAdmin,
       });
     });
 
+    // On success, go back to milestones list
     res.redirect("/milestones");
+
+  // Error Handling
   } catch (err) {
     console.error("Edit milestone error:", err);
     res.redirect("/milestones?error=Edit%20failed");
   }
 });
 
-// Delete Milestone Route (also needs updating)
+// Delete Milestone Route (admin-only)
+// Identifies a milestone by participant ID + title and removes it
 app.post("/milestones/:participantid/:title/delete", requireAuth, requireAdmin, async (req, res) => {
   try {
+    // Gets teh participant id and milestone title from the url
     const participantid = req.params.participantid;
     const title = decodeURIComponent(req.params.title);
 
+    // Delete the milestone that matches this participant and title
     await knex("milestones")
       .where({ 
         participantid: participantid,
@@ -889,7 +1018,10 @@ app.post("/milestones/:participantid/:title/delete", requireAuth, requireAdmin, 
       })
       .delete();
 
+    // Redirect back to milestones
     res.redirect("/milestones");
+
+  //Error Handling
   } catch (err) {
     console.error("Delete milestone error:", err);
     res.redirect("/milestones?error=Delete%20failed");
@@ -901,7 +1033,7 @@ app.get("/teapot", (req, res) => {
   res.status(418).send("I'm a teapot. ☕");
 });
 
-// ---- 404 ----
+// 404 Route
 app.use((req, res) => {
   res.status(404).send("404 - Not Found");
 });
