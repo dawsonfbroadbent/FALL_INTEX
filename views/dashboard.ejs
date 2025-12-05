@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+
+    <!-- Link to  CSS file -->
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+
+    <!-- This pulls in the shared header.ejs partial -->
+    <%- include('partials/header') %>
+
+    <h1 class="page-title">Ella Rises Data Dashboard</h1>
+
+
+    <!-- Tableau container -->
+    <div class='tableauPlaceholder' id='viz1764876361667' style='position: relative'>
+
+        <!-- Fallback static image -->
+        <noscript>
+            <a href='#'>
+                <img alt='Dashboard 1'
+                     src='https://public.tableau.com/static/images/FA/FALL_INTEX_DASHBOARD/Dashboard1/1_rss.png'
+                     style='border: none' />
+            </a>
+        </noscript>
+
+        <!-- live interactive dashboard -->
+        <object class='tableauViz' style='display:none;'>
+            <!-- Tableau embed parameters -->
+            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+            <param name='embed_code_version' value='3' />
+            <param name='site_root' value='' />
+            <param name='name' value='FALL_INTEX_DASHBOARD/Dashboard1' />
+
+            <!-- Removes tabs -->
+            <param name='tabs' value='no' />
+
+            <!-- Shows toolbar -->
+            <param name='toolbar' value='yes' />
+
+            <!-- Static image while loading -->
+            <param name='static_image' value='https://public.tableau.com/static/images/FA/FALL_INTEX_DASHBOARD/Dashboard1/1.png' />
+
+            <param name='animate_transition' value='yes' />
+            <param name='display_static_image' value='yes' />
+            <param name='display_spinner' value='yes' />
+            <param name='display_overlay' value='yes' />
+            <param name='display_count' value='yes' />
+            <param name='language' value='en-US' />
+
+            <!-- Ensures version loads -->
+            <param name='filter' value='publish=yes' />
+        </object>
+    </div>
+
+    <!-- loads Tableaus JavaScript API and sets dynamic size rules -->
+    <script type='text/javascript'>
+        // main dashboard container
+        var divElement = document.getElementById('viz1764876361667');
+        var vizElement = divElement.getElementsByTagName('object')[0];
+
+        // Makes dashboard responsive
+        if (divElement.offsetWidth > 800) {
+            vizElement.style.width = '100%';
+            vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+        } else if (divElement.offsetWidth > 500) {
+            vizElement.style.width = '100%';
+            vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+        } else {
+            // (mobile) Tableau recommends a fixed height for stability
+            vizElement.style.width = '100%';
+            vizElement.style.height = '1427px';
+        }
+
+        // Load JavaScript API dynamically
+        var scriptElement = document.createElement('script');
+        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+
+        // Inserts script to initialize the dashboard
+        vizElement.parentNode.insertBefore(scriptElement, vizElement);
+    </script>
+
+    <!-- Footer Partial -->
+    <%- include('partials/footer') %>
+
+</body>
+</html>
