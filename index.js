@@ -219,7 +219,7 @@ app.get("/logout", (req, res) => {
 
 // Donation page route
 app.get("/donate", (req, res) => {
-  res.render('donate.ejs', { error_message: "" }); // Build new page and redirect to it rather than use external page
+  res.render('donate.ejs', { error_message: "" });
 });
 
 // About page route
@@ -245,7 +245,7 @@ app.get('/programs', (req, res) => {
 
 //  Donations Data Page
 app.get("/donations", requireAuth, async (req, res) => {
-  const q = (req.query.q || "").trim();
+  const q = (req.query.q || "");
 
   const canEdit = isAdmin(req.session.level);
 
@@ -305,7 +305,7 @@ app.get("/donations", requireAuth, async (req, res) => {
   } catch (err) {
     res.render("donations", {
       donations: [],
-      q,
+      q: "",
       canEdit: isAdmin(req.session.level),
       isPublic: false,
       error_message: err.message,
@@ -321,7 +321,8 @@ app.post("/donations/add", async (req, res) => {
       let participantfirstname = req.body.firstname;
       let participantlastname = req.body.lastname;
       let participantemail = req.body.participant_email;
-      let newParticipant = {participantfirstname, participantlastname, participantemail};
+      let participantrole = "participant";
+      let newParticipant = {participantfirstname, participantlastname, participantemail, participantrole};
       await knex("participant").insert(newParticipant);
       participantResult = await knex("participant").select("participantid").where({"participantemail": req.body.participant_email}).first();
     };
@@ -347,6 +348,7 @@ app.post("/donations/add", async (req, res) => {
     // Render the same donations view with error
     return res.render("donations", {
       donations: [],
+      q: "",
       isPublic: true,
       canEdit: false,
       error_message: `Could not submit donation: ${err.message}`,
@@ -448,6 +450,9 @@ app.post("/participants/add", requireAuth, requireAdmin, async (req, res) => {
     let participantemail = req.body.email;
     let password = req.body.password;
     let participantdob = req.body.dob;
+    if (!participantdob || participantdob.trim() === '') {
+      participantdob = null;
+    }
     let participantrole = "participant";
     let participantphone = req.body.phone;
     let participantcity = req.body.city;
