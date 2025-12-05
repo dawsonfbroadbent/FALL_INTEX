@@ -1,14 +1,24 @@
+<!-- Site header with logo and main navigation -->
+<!-- Dawson Broadbent, Ashlynn Burgess, Markus Walker -->
+
 <header>
   <div class="container">
+
+    <!-- Logo links back to home -->
     <a href="/" class="logo">
       <img src="https://static.wixstatic.com/media/118ed8_519b33c09d2a4ba9aa0695b394f27772~mv2.png/v1/fill/w_950,h_950,al_c,q_90,enc_avif,quality_auto/118ed8_519b33c09d2a4ba9aa0695b394f27772~mv2.png" alt="Ella Rises Logo">
     </a>
+
+    <!-- Primary navigation links -->
     <nav>
       <a href="/">Home</a>
       <a href="/programs">Programs</a>
       <a href="/about">About</a>
       <a href="/contact">Contact</a>
+
+      <!-- Auth-aware section: show data links when logged in -->
       <% if (session && session.isLoggedIn) { %>
+        <!-- Dropdown for internal data views (secured pages) -->
         <div class="dropdown">
           <a href="#" class="dropdown-toggle">View Data ▾</a>
           <div class="dropdown-menu">
@@ -20,13 +30,20 @@
             <a href="/dashboard">Dashboard</a>
           </div>
         </div>
+
+        <!-- Manager-only Users link (session.level === 'M') -->
         <% if (session.level === 'M') { %>
           <a href="/users">Users</a>
         <% } %>
+
+        <!-- Logout with current user's name -->
         <a href="/logout">Logout (<%= session.firstname %> <%= session.lastname %>)</a>
       <% } else { %>
+        <!-- Public view: show Login link when not authenticated -->
         <a href="/login">Login</a>
       <% } %>
+
+      <!-- Persistent Big Donate Button -->
       <a href="/donate" class="btn btn-primary">Donate</a>
     </nav>
   </div>
