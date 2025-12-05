@@ -450,6 +450,9 @@ app.post("/participants/add", requireAuth, requireAdmin, async (req, res) => {
     let participantemail = req.body.email;
     let password = req.body.password;
     let participantdob = req.body.dob;
+    if (!participantdob || participantdob.trim() === '') {
+      participantdob = null;
+    }
     let participantrole = "participant";
     let participantphone = req.body.phone;
     let participantcity = req.body.city;
